@@ -1,0 +1,202 @@
+/* ── Theme Tokens ── */
+:root {
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-900: #1e3a8a;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-400: #94a3b8;
+  --gray-600: #475569;
+  --gray-800: #1e293b;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+.complete-profile-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(160deg, #ffffff 0%, #eff6ff 40%, #dbeafe 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ── Card ── */
+.complete-profile-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 48px 40px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--blue-100);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle decorative top accent */
+.complete-profile-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--blue-600), var(--blue-500));
+}
+
+/* ── Icon Circle (add a shield icon in JSX to match) ── */
+.complete-profile-card .icon-circle {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  background: var(--blue-50);
+  border: 2px solid var(--blue-100);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue-600);
+  font-size: 28px;
+}
+
+.complete-profile-card h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gray-800);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+}
+
+.complete-profile-card > p {
+  font-size: 15px;
+  color: var(--gray-600);
+  line-height: 1.65;
+  margin: 0 auto 32px;
+  max-width: 360px;
+}
+
+/* ── Benefits ── */
+.benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--gray-50);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gray-800);
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.benefit:hover {
+  background: #ffffff;
+  border-color: var(--blue-100);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* Checkmark circle for each benefit */
+.benefit::before {
+  content: "✓";
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--blue-600);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* ── Buttons ── */
+.complete-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--blue-600), var(--blue-700));
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.complete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.45);
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-800));
+}
+
+.complete-btn:active {
+  transform: translateY(0);
+}
+
+.skip-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--gray-600);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.skip-btn:hover {
+  background: var(--gray-50);
+  border-color: #cbd5e1;
+  color: var(--gray-800);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .complete-profile-page {
+    padding: 16px;
+    background: #ffffff;
+  }
+
+  .complete-profile-card {
+    padding: 36px 24px;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  .complete-profile-card::before {
+    left: 24px;
+    right: 24px;
+    border-radius: 2px;
+  }
+
+  .complete-profile-card h1 {
+    font-size: 24px;
+  }
+}

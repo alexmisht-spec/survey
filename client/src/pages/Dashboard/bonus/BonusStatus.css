@@ -1,0 +1,134 @@
+.bonus-status-page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#f5f7fb;
+
+    padding:30px;
+
+}
+
+.bonus-card{
+
+    width:100%;
+
+    max-width:600px;
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:40px;
+
+    box-shadow:0 12px 35px rgba(0,0,0,.08);
+
+    text-align:center;
+
+}
+
+.bonus-card h1{
+
+    margin-bottom:10px;
+
+    color:#111827;
+
+}
+
+.subtitle{
+
+    color:#6b7280;
+
+    margin-bottom:30px;
+
+}
+
+.status-box{
+
+    border:1px solid #e5e7eb;
+
+    border-radius:14px;
+
+    padding:25px;
+
+    margin-bottom:30px;
+
+}
+
+.pending{
+
+    color:#d97706;
+
+}
+
+.approved{
+
+    color:#16a34a;
+
+}
+
+.rejected{
+
+    color:#dc2626;
+
+}
+
+.status-box p{
+
+    margin-top:15px;
+
+    color:#4b5563;
+
+    line-height:1.6;
+
+}
+
+.dashboard-btn,
+.retry-btn{
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:14px 20px;
+
+    border-radius:10px;
+
+    color:#fff;
+
+    font-weight:600;
+
+}
+
+.dashboard-btn{
+
+    width:100%;
+
+    background:#2563eb;
+
+}
+
+.retry-btn{
+
+    margin-top:20px;
+
+    background:#dc2626;
+
+}
+
+.dashboard-btn:hover{
+
+    background:#1d4ed8;
+
+}
+
+.retry-btn:hover{
+
+    background:#b91c1c;
+
+}

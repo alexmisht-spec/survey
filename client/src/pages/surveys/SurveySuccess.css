@@ -1,0 +1,93 @@
+.success-container{
+
+    max-width:700px;
+
+    margin:80px auto;
+
+    background:white;
+
+    padding:50px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    box-shadow:0 10px 35px rgba(0,0,0,.08);
+
+}
+
+.success-icon{
+
+    font-size:80px;
+
+    color:#16a34a;
+
+    margin-bottom:20px;
+
+}
+
+.success-container h1{
+
+    margin-bottom:10px;
+
+    color:#111827;
+
+}
+
+.success-container p{
+
+    color:#6b7280;
+
+    margin-bottom:35px;
+
+}
+
+.reward-card{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:15px;
+
+    background:#ecfdf5;
+
+    color:#166534;
+
+    padding:18px;
+
+    border-radius:12px;
+
+    font-size:20px;
+
+    font-weight:600;
+
+    margin-bottom:35px;
+
+}
+
+.dashboard-btn{
+
+    border:none;
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:15px 35px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+}
+
+.dashboard-btn:hover{
+
+    background:#1d4ed8;
+
+}

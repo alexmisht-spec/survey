@@ -1,0 +1,553 @@
+/* ===================================
+   VERIFICATION PENDING PAGE
+=================================== */
+
+.verification-page {
+    min-height: 100vh;
+    background: #f6f8fc;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 48px 24px;
+    box-sizing: border-box;
+}
+
+/* ===================================
+   CARD
+=================================== */
+
+.verification-card {
+    width: 100%;
+    max-width: 720px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.verification-card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.03);
+    border-color: #cbd5e1;
+}
+
+/* ===================================
+   SUCCESS ICON
+=================================== */
+
+.verification-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: #f0fdf4;
+    color: #16a34a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+    border: 3px solid #dcfce7;
+    animation: iconPop 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes iconPop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===================================
+   HEADING
+=================================== */
+
+.verification-card h1 {
+    margin: 0 0 10px 0;
+    color: #0f172a;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.verification-subtitle {
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.7;
+    margin: 0 auto 36px auto;
+    max-width: 480px;
+}
+
+/* ===================================
+   STEPS
+=================================== */
+
+.verification-steps {
+    margin: 32px 0;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 150ms ease;
+}
+
+.step:last-child {
+    border-bottom: none;
+}
+
+.step:hover {
+    background: #f8fafc;
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.step-icon.success {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.step-icon.pending {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.step-icon:not(.success):not(.pending) {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.step h3 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.step p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ===================================
+   NOTE BOX
+=================================== */
+
+.verification-note {
+    margin: 32px 0;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-left: 4px solid #2563eb;
+    padding: 20px 24px;
+    border-radius: 12px;
+    text-align: left;
+    transition: all 200ms ease;
+}
+
+.verification-note:hover {
+    box-shadow: 0 4px 12px rgb(37 99 235 / 0.08);
+}
+
+.verification-note strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #1e40af;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.verification-note p {
+    margin: 0;
+    color: #3b82f6;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* ===================================
+   WHY WE VERIFY SECTION
+=================================== */
+
+.verification-info {
+    margin: 40px 0 32px 0;
+    text-align: left;
+    padding-top: 32px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.verification-info h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+.verification-info h2 svg {
+    color: #2563eb;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.verification-info > p {
+    margin: 0 0 24px 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.info-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.info-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #2563eb;
+    opacity: 0;
+    transition: opacity 200ms ease;
+}
+
+.info-card:hover {
+    background: #fff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.04);
+    transform: translateY(-2px);
+}
+
+.info-card:hover::before {
+    opacity: 1;
+}
+
+.info-card svg {
+    font-size: 24px;
+    color: #2563eb;
+    margin-bottom: 14px;
+    display: inline-flex;
+}
+
+.info-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.info-card p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* ===================================
+   DASHBOARD BUTTON
+=================================== */
+
+.dashboard-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+    background: #2563eb;
+    color: #fff;
+    padding: 16px 32px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgb(37 99 235 / 0.2);
+    border: none;
+    cursor: pointer;
+}
+
+.dashboard-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgb(37 99 235 / 0.25);
+}
+
+.dashboard-btn:active {
+    transform: translateY(0);
+}
+
+.dashboard-btn svg {
+    font-size: 16px;
+}
+
+/* ===================================
+   RESPONSIVE: TABLET
+=================================== */
+
+@media (max-width: 1024px) {
+    .verification-card {
+        padding: 36px;
+    }
+
+    .info-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .info-card {
+        padding: 20px 16px;
+    }
+}
+
+/* ===================================
+   RESPONSIVE: MOBILE
+=================================== */
+
+@media (max-width: 768px) {
+    .verification-page {
+        padding: 20px;
+        padding-bottom: 100px;
+    }
+
+    .verification-card {
+        padding: 28px 24px;
+        border-radius: 14px;
+    }
+
+    .verification-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    .verification-card h1 {
+        font-size: 24px;
+    }
+
+    .verification-subtitle {
+        font-size: 14px;
+        margin-bottom: 28px;
+    }
+
+    .verification-steps {
+        margin: 24px 0;
+    }
+
+    .step {
+        padding: 16px 20px;
+        gap: 14px;
+    }
+
+    .step-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .step h3 {
+        font-size: 14px;
+    }
+
+    .step p {
+        font-size: 13px;
+    }
+
+    .verification-note {
+        padding: 16px 20px;
+        margin: 24px 0;
+    }
+
+    .verification-info {
+        margin: 32px 0 24px 0;
+        padding-top: 24px;
+    }
+
+    .verification-info h2 {
+        font-size: 16px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .info-card {
+        padding: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        text-align: left;
+    }
+
+    .info-card svg {
+        margin-bottom: 0;
+        flex-shrink: 0;
+        font-size: 22px;
+    }
+
+    .info-card h4 {
+        font-size: 14px;
+    }
+
+    .info-card p {
+        font-size: 13px;
+    }
+
+    .dashboard-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 15px;
+    }
+}
+
+/* ===================================
+   RESPONSIVE: SMALL PHONES
+=================================== */
+
+@media (max-width: 480px) {
+    .verification-page {
+        padding: 16px;
+        padding-bottom: 100px;
+    }
+
+    .verification-card {
+        padding: 24px 20px;
+        border-radius: 12px;
+    }
+
+    .verification-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+    }
+
+    .verification-card h1 {
+        font-size: 22px;
+    }
+
+    .verification-subtitle {
+        font-size: 13px;
+    }
+
+    .step {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .step-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .step h3 {
+        font-size: 13px;
+    }
+
+    .step p {
+        font-size: 12px;
+    }
+
+    .verification-note {
+        padding: 14px 16px;
+    }
+
+    .verification-note strong {
+        font-size: 14px;
+    }
+
+    .verification-note p {
+        font-size: 13px;
+    }
+
+    .verification-info h2 {
+        font-size: 15px;
+    }
+
+    .info-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .info-card svg {
+        font-size: 20px;
+    }
+
+    .info-card h4 {
+        font-size: 13px;
+    }
+
+    .info-card p {
+        font-size: 12px;
+    }
+
+    .dashboard-btn {
+        padding: 14px;
+        font-size: 14px;
+    }
+}
+
+/* ===================================
+   REDUCED MOTION
+=================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .verification-card,
+    .step,
+    .info-card,
+    .dashboard-btn,
+    .verification-note {
+        transition: none;
+    }
+
+    .verification-card:hover,
+    .info-card:hover,
+    .dashboard-btn:hover {
+        transform: none;
+    }
+
+    .verification-icon {
+        animation: none;
+    }
+}

@@ -1,0 +1,445 @@
+/* ===================================
+   VERIFICATION PAGE
+=================================== */
+
+.verification-page {
+    min-height: 100vh;
+    background: #f6f8fc;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 48px 24px;
+    box-sizing: border-box;
+}
+
+/* ===================================
+   CARD
+=================================== */
+
+.verification-card {
+    width: 100%;
+    max-width: 720px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 40px;
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.verification-card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.03);
+    border-color: #cbd5e1;
+}
+
+.verification-card h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.subtitle {
+    margin: 10px 0 0 0;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 560px;
+}
+
+/* ===================================
+   INFO BOXES
+=================================== */
+
+.verification-info {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.info-box {
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.info-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #2563eb;
+    opacity: 0;
+    transition: opacity 200ms ease;
+}
+
+.info-box:hover {
+    border-color: #cbd5e1;
+    background: #fff;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.04);
+}
+
+.info-box:hover::before {
+    opacity: 1;
+}
+
+.info-box strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.info-box span {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+    display: block;
+}
+
+/* ===================================
+   FORM
+=================================== */
+
+.verification-form {
+    margin-top: 36px;
+}
+
+.upload-group {
+    margin-bottom: 24px;
+}
+
+.upload-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #475569;
+    font-size: 14px;
+}
+
+/* File input wrapper */
+.upload-group input[type="file"] {
+    width: 100%;
+    padding: 16px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+    cursor: pointer;
+    font-size: 14px;
+    color: #64748b;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+}
+
+.upload-group input[type="file"]:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.upload-group input[type="file"]:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background: #eff6ff;
+}
+
+/* File selected state */
+.upload-group input[type="file"]:valid {
+    border-style: solid;
+    border-color: #22c55e;
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+/* ===================================
+   SUBMIT BUTTON
+=================================== */
+
+.submit-btn {
+    width: 100%;
+    margin-top: 12px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgb(37 99 235 / 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgb(37 99 235 / 0.25);
+}
+
+.submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Loading spinner inside button */
+.submit-btn:disabled::after {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===================================
+   VERIFICATION NOTE
+=================================== */
+
+.verification-note {
+    margin-top: 36px;
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 24px;
+    border-radius: 12px;
+    transition: all 200ms ease;
+}
+
+.verification-note:hover {
+    border-color: #fde68a;
+    box-shadow: 0 4px 12px rgb(245 158 11 / 0.08);
+}
+
+.verification-note h3 {
+    margin: 0 0 14px 0;
+    color: #92400e;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.verification-note ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.verification-note li {
+    margin-bottom: 10px;
+    color: #78350f;
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.verification-note li::before {
+    content: "✓";
+    color: #f59e0b;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.verification-note li:last-child {
+    margin-bottom: 0;
+}
+
+/* ===================================
+   RESPONSIVE: TABLET
+=================================== */
+
+@media (max-width: 1024px) {
+    .verification-card {
+        padding: 32px;
+    }
+
+    .verification-info {
+        grid-template-columns: 1fr;
+    }
+
+    .info-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .info-box strong {
+        margin-bottom: 0;
+        flex-shrink: 0;
+        min-width: 180px;
+    }
+}
+
+/* ===================================
+   RESPONSIVE: MOBILE
+=================================== */
+
+@media (max-width: 768px) {
+    .verification-page {
+        padding: 20px;
+        padding-bottom: 100px;
+    }
+
+    .verification-card {
+        padding: 24px;
+        border-radius: 14px;
+    }
+
+    .verification-card h1 {
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+    }
+
+    .verification-info {
+        margin-top: 24px;
+        gap: 12px;
+    }
+
+    .info-box {
+        padding: 16px;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-box strong {
+        min-width: auto;
+    }
+
+    .upload-group input[type="file"] {
+        padding: 14px;
+    }
+
+    .submit-btn {
+        padding: 14px;
+        font-size: 15px;
+    }
+
+    .verification-note {
+        padding: 20px;
+        margin-top: 28px;
+    }
+
+    .verification-note h3 {
+        font-size: 15px;
+    }
+
+    .verification-note li {
+        font-size: 13px;
+    }
+}
+
+/* ===================================
+   RESPONSIVE: SMALL PHONES
+=================================== */
+
+@media (max-width: 480px) {
+    .verification-page {
+        padding: 16px;
+        padding-bottom: 100px;
+    }
+
+    .verification-card {
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .verification-card h1 {
+        font-size: 22px;
+    }
+
+    .subtitle {
+        font-size: 13px;
+    }
+
+    .info-box {
+        padding: 14px;
+    }
+
+    .info-box strong {
+        font-size: 13px;
+    }
+
+    .info-box span {
+        font-size: 12px;
+    }
+
+    .upload-group label {
+        font-size: 13px;
+    }
+
+    .upload-group input[type="file"] {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    .submit-btn {
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .verification-note {
+        padding: 16px;
+    }
+
+    .verification-note h3 {
+        font-size: 14px;
+    }
+
+    .verification-note li {
+        font-size: 12px;
+        gap: 8px;
+    }
+}
+
+/* ===================================
+   REDUCED MOTION
+=================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .verification-card,
+    .info-box,
+    .upload-group input[type="file"],
+    .submit-btn,
+    .verification-note {
+        transition: none;
+    }
+
+    .verification-card:hover,
+    .submit-btn:hover {
+        transform: none;
+    }
+
+    .submit-btn:disabled::after {
+        animation: none;
+    }
+}

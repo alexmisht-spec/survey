@@ -1,0 +1,252 @@
+/* ===========================
+   REGISTER PAGE
+=========================== */
+
+.register-container{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px 20px;
+    background:#f6f8fc;
+}
+
+.register-card{
+    width:100%;
+    max-width:560px;
+    background:#fff;
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 20px 45px rgba(0,0,0,.08);
+    border:1px solid #eef2f7;
+}
+
+/* ===========================
+   Header
+=========================== */
+
+.register-header{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.register-header h2{
+    margin:0;
+    font-size:32px;
+    font-weight:700;
+    color:#111827;
+}
+
+.register-header p{
+    margin-top:10px;
+    color:#6b7280;
+    font-size:15px;
+    line-height:1.6;
+}
+
+/* ===========================
+   Form
+=========================== */
+
+.register-form{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group label{
+    margin-bottom:8px;
+    font-size:14px;
+    font-weight:600;
+    color:#374151;
+}
+
+.form-group input{
+    width:100%;
+    height:50px;
+    padding:0 16px;
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    transition:.25s;
+    box-sizing:border-box;
+    background:#fff;
+}
+
+.form-group input:focus{
+    border-color:#2563eb;
+    box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+
+/* ===========================
+   Password
+=========================== */
+
+.password-field{
+    position:relative;
+}
+
+.password-field input{
+    padding-right:50px;
+}
+
+.password-toggle{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:34px;
+    border:none;
+    background:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    color:#6b7280;
+    font-size:18px;
+    transition:.25s;
+}
+
+.password-toggle:hover{
+    color:#2563eb;
+}
+
+/* ===========================
+   Terms
+=========================== */
+
+.terms-check{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    margin-top:5px;
+    cursor:pointer;
+}
+
+.terms-check input{
+    margin-top:3px;
+    accent-color:#2563eb;
+}
+
+.terms-check span{
+    color:#4b5563;
+    line-height:1.5;
+    font-size:14px;
+}
+
+.terms-check strong{
+    color:#2563eb;
+}
+
+/* ===========================
+   Button
+=========================== */
+
+.register-btn{
+    width:100%;
+    height:52px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
+    margin-top:10px;
+}
+
+.register-btn:hover:not(:disabled){
+    background:#1d4ed8;
+}
+
+.register-btn:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+}
+
+/* ===========================
+   Footer
+=========================== */
+
+.register-footer{
+    margin-top:28px;
+    text-align:center;
+    color:#6b7280;
+    font-size:15px;
+}
+
+.register-footer a{
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.register-footer a:hover{
+    text-decoration:underline;
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media(max-width:768px){
+
+    .register-container{
+        padding:25px 15px;
+    }
+
+    .register-card{
+        padding:30px 22px;
+        border-radius:16px;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+        gap:16px;
+    }
+
+    .register-header h2{
+        font-size:28px;
+    }
+
+}
+
+@media(max-width:480px){
+
+    .register-card{
+        padding:24px 18px;
+    }
+
+    .register-header h2{
+        font-size:24px;
+    }
+
+    .register-header p{
+        font-size:14px;
+    }
+
+    .form-group input{
+        height:48px;
+        font-size:14px;
+    }
+
+    .register-btn{
+        height:50px;
+        font-size:15px;
+    }
+
+}

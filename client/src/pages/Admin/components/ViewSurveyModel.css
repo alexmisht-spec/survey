@@ -1,0 +1,33 @@
+.question-preview{
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    padding:18px;
+
+    margin-bottom:20px;
+
+    background:#fafafa;
+
+}
+
+.question-preview h4{
+
+    margin-bottom:10px;
+
+}
+
+.question-preview ul{
+
+    margin-top:10px;
+
+    padding-left:20px;
+
+}
+
+.question-preview li{
+
+    margin-bottom:6px;
+
+}

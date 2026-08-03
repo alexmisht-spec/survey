@@ -1,0 +1,473 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  REGISTERED
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SurveyStatus {
+  ACTIVE
+  LOCKED
+  COMING_SOON
+  CLOSED
+}
+
+enum WithdrawalStatus {
+  PENDING
+
+  APPROVED
+
+  PROCESSING
+
+  PAID
+
+  FAILED
+
+  REJECTED
+}
+
+enum PaymentMethod {
+  MPESA
+}
+
+enum TransactionType {
+  SURVEY_REWARD
+  WITHDRAWAL
+  WITHDRAWAL_REFUND
+  BONUS
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  SUCCESS
+  FAILED
+  REVERSED
+}
+
+enum QuestionType {
+  TEXT
+  TEXTAREA
+  RADIO
+  CHECKBOX
+  SELECT
+  NUMBER
+  DATE
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | USERS
+ * |--------------------------------------------------------------------------
+ */
+
+model User {
+  id String @id @default(cuid())
+
+  firstName String
+
+  lastName String
+
+  email String @unique
+
+  phone String @unique
+
+  password String
+
+  role UserRole @default(USER)
+
+  status AccountStatus @default(REGISTERED)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  verification Verification?
+
+  wallet Wallet?
+
+  surveyResponses   SurveyResponse[]
+  passwordOtp       String?
+  passwordOtpExpiry DateTime?
+
+  withdrawals      Withdrawal[]
+  assignments      SurveyAssignment[]
+  notifications    Notification[]
+  passwordOtps     PasswordResetOTP[]
+  rewardCredential RewardCredential?
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | VERIFICATION
+ * |--------------------------------------------------------------------------
+ */
+
+model Verification {
+  id String @id @default(cuid())
+
+  userId String @unique
+
+  idFront String
+
+  idBack String
+
+  status VerificationStatus @default(PENDING)
+
+  rejectionReason String?
+
+  reviewedBy String?
+
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | WALLET
+ * |--------------------------------------------------------------------------
+ */
+model Wallet {
+  id String @id @default(cuid())
+
+  userId String @unique
+
+  availableBalance Decimal @default(0)
+
+  pendingBalance Decimal @default(0)
+
+  totalEarned Decimal @default(0)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  transactions WalletTransaction[]
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | WALLET TRANSACTIONS
+ * |--------------------------------------------------------------------------
+ */
+
+model WalletTransaction {
+  id String @id @default(cuid())
+
+  walletId String
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  amount Decimal @db.Decimal(18, 2)
+
+  balanceBefore Decimal? @db.Decimal(18, 2)
+
+  balanceAfter Decimal? @db.Decimal(18, 2)
+
+  type TransactionType
+
+  status TransactionStatus @default(PENDING)
+
+  reference String?
+
+  description String?
+
+  surveyResponseId String?
+
+  withdrawalId String?
+
+  approvedBy String?
+
+  callbackPayload Json?
+
+  requestIp String?
+
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  surveyResponse SurveyResponse? @relation(fields: [surveyResponseId], references: [id])
+
+  withdrawal Withdrawal? @relation(fields: [withdrawalId], references: [id])
+
+  @@index([walletId])
+  @@index([withdrawalId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | SURVEYS
+ * |--------------------------------------------------------------------------
+ */
+
+model Survey {
+  id String @id @default(cuid())
+
+  title String
+
+  description String
+
+  reward Decimal
+
+  timeEstimate Int @default(10)
+
+  status SurveyStatus @default(COMING_SOON)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  questions SurveyQuestion[]
+
+  responses SurveyResponse[]
+
+  assignments SurveyAssignment[]
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * |--------------------------------------------------------------------------
+ * |SURVEY ASSIGNMENTS
+ * |-------------------------------------------------------------------------
+ */
+model SurveyAssignment {
+  id String @id @default(cuid())
+
+  userId   String
+  surveyId String
+
+  assignedAt DateTime @default(now())
+
+  started Boolean @default(false)
+
+  completed Boolean @default(false)
+
+  completedAt DateTime?
+
+  // Reward reviewed by admin
+  rewardApproved Boolean @default(false)
+
+  approvedAt DateTime?
+
+  // Money has been withdrawn and paid
+  rewardPaid Boolean @default(false)
+
+  paidAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, surveyId])
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | SURVEY QUESTIONS
+ * |--------------------------------------------------------------------------
+ */
+
+model SurveyQuestion {
+  id String @id @default(cuid())
+
+  surveyId String
+
+  question String
+
+  questionType QuestionType
+
+  options Json?
+
+  placeholder String?
+
+  required Boolean @default(true)
+
+  order Int
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  answers SurveyAnswer[]
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | SURVEY RESPONSES
+ * |--------------------------------------------------------------------------
+ */
+
+model SurveyResponse {
+  id String @id @default(cuid())
+
+  userId String
+
+  surveyId String
+
+  completed Boolean @default(false)
+
+  rewardPaid Boolean @default(false)
+
+  submittedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  answers      SurveyAnswer[]
+  transactions WalletTransaction[]
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | SURVEY ANSWERS
+ * |--------------------------------------------------------------------------
+ */
+
+model SurveyAnswer {
+  id String @id @default(cuid())
+
+  responseId String
+
+  questionId String
+
+  answer String
+
+  response SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  question SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | WITHDRAWALS
+ * |--------------------------------------------------------------------------
+ */
+model Withdrawal {
+  id String @id @default(cuid())
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount Decimal @db.Decimal(18, 2)
+
+  phoneNumber String
+
+  status WithdrawalStatus @default(PENDING)
+
+  adminId String?
+
+  approvedAt DateTime?
+
+  processedAt DateTime?
+
+  failureReason String?
+
+  conversationId String?
+
+  originatorConversationId String?
+
+  transactionId String?
+
+  callbackPayload Json?
+
+  requestIp String?
+
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  transactions WalletTransaction[]
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetOTP {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  otpHash String
+
+  attempts Int @default(0)
+
+  used Boolean @default(false)
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model RewardCredential {
+  id             String @id @default(cuid())
+  userId         String @unique
+  email          String
+  password       String
+  transactionPin String
+
+  taskCompleted Boolean @default(false)
+  rewardPaid    Boolean @default(false)
+
+  adminApproved   Boolean?
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

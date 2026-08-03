@@ -1,0 +1,115 @@
+.survey-container{
+    max-width:850px;
+    margin:40px auto;
+    padding:35px;
+    background:#fff;
+    border-radius:20px;
+    box-shadow:0 10px 35px rgba(0,0,0,.08);
+}
+
+.survey-title{
+    font-size:30px;
+    color:#1f2937;
+    margin-bottom:8px;
+}
+
+.survey-description{
+    color:#6b7280;
+    margin-bottom:30px;
+}
+
+.progress-text{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:12px;
+    font-weight:600;
+}
+
+.progress-bar{
+    width:100%;
+    height:10px;
+    background:#e5e7eb;
+    border-radius:50px;
+    overflow:hidden;
+    margin-bottom:35px;
+}
+
+.progress-fill{
+    height:100%;
+    background:#2563eb;
+    transition:.35s;
+}
+
+.question-card{
+    padding:25px;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    background:#fafafa;
+}
+
+.question-title{
+    margin-bottom:25px;
+    font-size:24px;
+}
+
+.navigation{
+    display:flex;
+    justify-content:space-between;
+    margin-top:35px;
+}
+
+.navigation button{
+
+    padding:14px 28px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    transition:.3s;
+
+}
+
+.previous-btn{
+
+    background:#d1d5db;
+
+}
+
+.previous-btn:hover{
+
+    background:#9ca3af;
+
+}
+
+.next-btn{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
+.next-btn:hover{
+
+    background:#1d4ed8;
+
+}
+
+.submit-btn{
+
+    background:#16a34a;
+
+    color:#fff;
+
+}
+
+.submit-btn:hover{
+
+    background:#15803d;
+
+}

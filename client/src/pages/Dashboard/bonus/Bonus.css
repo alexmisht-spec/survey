@@ -1,0 +1,430 @@
+/* ==========================================
+   BONUS PAGE
+========================================== */
+
+.bonus-page{
+    width:100%;
+    min-height:100vh;
+    padding:32px;
+    background:#f8fafc;
+    box-sizing:border-box;
+}
+
+.bonus-header{
+    margin-bottom:30px;
+}
+
+.bonus-header h1{
+    margin:0;
+    font-size:30px;
+    font-weight:800;
+    color:#0f172a;
+}
+
+.bonus-header p{
+    margin-top:10px;
+    color:#64748b;
+    line-height:1.7;
+    max-width:700px;
+}
+
+/* ==========================================
+   CARD
+========================================== */
+
+.bonus-card{
+    background:#fff;
+    border-radius:18px;
+    border:1px solid #e2e8f0;
+    padding:30px;
+    display:flex;
+    gap:25px;
+    align-items:flex-start;
+    box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+
+.bonus-icon{
+    width:70px;
+    height:70px;
+    border-radius:18px;
+    background:#eff6ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-shrink:0;
+}
+
+.bonus-icon svg{
+    font-size:32px;
+    color:#2563eb;
+}
+
+.bonus-content{
+    flex:1;
+}
+
+.bonus-content h2{
+    margin:0 0 12px;
+    color:#0f172a;
+    font-size:24px;
+    font-weight:700;
+}
+
+.bonus-description{
+    margin-bottom:24px;
+    color:#64748b;
+    line-height:1.8;
+}
+
+/* ==========================================
+   INSTRUCTIONS
+========================================== */
+
+.instruction-box{
+    background:#f8fafc;
+    border:1px solid #dbeafe;
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:24px;
+}
+
+.instruction-box h4{
+    margin:0 0 15px;
+    color:#0f172a;
+    font-size:18px;
+}
+
+.instruction-box ol{
+    margin:0;
+    padding-left:20px;
+}
+
+.instruction-box li{
+    margin-bottom:12px;
+    color:#475569;
+    line-height:1.8;
+}
+
+.instruction-box strong{
+    color:#0f172a;
+}
+
+/* ==========================================
+   META
+========================================== */
+
+.bonus-meta{
+    display:flex;
+    gap:40px;
+}
+
+.bonus-meta span{
+    display:flex;
+    flex-direction:column;
+    font-size:13px;
+    color:#64748b;
+    text-transform:uppercase;
+    gap:5px;
+}
+
+.bonus-meta strong{
+    font-size:20px;
+    color:#0f172a;
+}
+
+/* ==========================================
+   ACTIONS
+========================================== */
+
+.bonus-actions{
+    width:220px;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    flex-shrink:0;
+}
+
+.download-btn,
+.complete-task{
+    width:100%;
+    height:52px;
+    border:none;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    text-decoration:none;
+    font-weight:700;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.download-btn{
+    background:#2563eb;
+    color:#fff;
+}
+
+.download-btn:hover{
+    background:#1d4ed8;
+}
+
+.complete-task{
+    background:#0f172a;
+    color:#fff;
+}
+
+.complete-task:hover{
+    background:#1e293b;
+}
+
+/* ==========================================
+   COMING SOON
+========================================== */
+
+.coming-title{
+    margin:45px 0 20px;
+}
+
+.coming-title h2{
+    margin:0;
+    color:#0f172a;
+}
+
+.coming-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:20px;
+}
+
+.coming-card{
+    position:relative;
+    background:#fff;
+    border:2px dashed #d4d4d8;
+    border-radius:16px;
+    padding:28px;
+    overflow:hidden;
+}
+
+.coming-icon{
+    width:60px;
+    height:60px;
+    border-radius:15px;
+    background:#f3e8ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#7c3aed;
+    font-size:28px;
+    margin-bottom:20px;
+}
+
+.coming-card h3{
+    margin:0;
+    color:#0f172a;
+}
+
+.coming-card p{
+    margin:14px 0;
+    color:#64748b;
+    line-height:1.7;
+}
+
+.coming-card strong{
+    font-size:22px;
+    color:#0f172a;
+}
+
+.coming-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,.88);
+    backdrop-filter:blur(4px);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    color:#7c3aed;
+    font-weight:700;
+}
+
+.coming-overlay svg{
+    font-size:34px;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media(max-width:992px){
+
+.bonus-page{
+    padding:24px;
+}
+
+.bonus-card{
+    flex-direction:column;
+}
+
+.bonus-actions{
+    width:100%;
+    flex-direction:row;
+}
+
+.download-btn,
+.complete-task{
+    flex:1;
+}
+
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media(max-width:768px){
+
+.bonus-page{
+    padding:18px;
+    padding-bottom:100px;
+}
+
+.bonus-header h1{
+    font-size:25px;
+}
+
+.bonus-header p{
+    font-size:14px;
+}
+
+.bonus-card{
+    padding:20px;
+}
+
+.bonus-icon{
+    width:60px;
+    height:60px;
+}
+
+.bonus-content h2{
+    font-size:20px;
+}
+
+.bonus-description{
+    font-size:14px;
+}
+
+.instruction-box{
+    padding:16px;
+}
+
+.instruction-box h4{
+    font-size:16px;
+}
+
+.instruction-box li{
+    font-size:13px;
+}
+
+.bonus-meta{
+    flex-direction:column;
+    gap:15px;
+}
+
+.bonus-meta span{
+    flex-direction:row;
+    justify-content:space-between;
+}
+
+.bonus-actions{
+    flex-direction:column;
+}
+
+.download-btn,
+.complete-task{
+    width:100%;
+}
+
+.coming-grid{
+    grid-template-columns:1fr;
+}
+
+}
+
+/* ==========================================
+   SMALL PHONES
+========================================== */
+
+@media(max-width:480px){
+
+.bonus-page{
+    padding:14px;
+}
+
+.bonus-header h1{
+    font-size:22px;
+}
+
+.bonus-card{
+    padding:16px;
+}
+
+.bonus-icon{
+    width:52px;
+    height:52px;
+}
+
+.bonus-icon svg{
+    font-size:24px;
+}
+
+.bonus-content h2{
+    font-size:18px;
+}
+
+.bonus-description{
+    font-size:13px;
+}
+
+.instruction-box{
+    padding:14px;
+}
+
+.instruction-box h4{
+    font-size:15px;
+}
+
+.instruction-box li{
+    font-size:12px;
+}
+
+.download-btn,
+.complete-task{
+    height:48px;
+    font-size:14px;
+}
+
+.coming-card{
+    padding:20px;
+}
+
+.coming-icon{
+    width:50px;
+    height:50px;
+    font-size:24px;
+}
+
+.coming-card h3{
+    font-size:17px;
+}
+
+.coming-card p{
+    font-size:13px;
+}
+
+.coming-card strong{
+    font-size:19px;
+}
+
+}
