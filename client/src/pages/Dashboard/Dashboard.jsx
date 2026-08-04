@@ -180,11 +180,7 @@ const hasSubmittedVerification =
 
                                 • National ID (Back)
 
-                                <br />
-
-                                • KRA PIN Certificate
-
-                                <br /><br />
+                         <br />
 
                                 Verification usually takes less than
                                 <strong> 24 hours.</strong>
