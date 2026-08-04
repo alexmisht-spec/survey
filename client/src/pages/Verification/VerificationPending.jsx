@@ -10,7 +10,7 @@ import {
     FaLock,
 } from "react-icons/fa";
 
-import "./VerificationPending.css";
+import "./verificationPending.css";
 
 export default function VerificationPending() {
 
