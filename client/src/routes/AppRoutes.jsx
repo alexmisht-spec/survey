@@ -29,7 +29,7 @@ import Wallet from "../pages/Dashboard/Wallet";
 import Withdraw from "../pages/Dashboard/Withdraw";
 import SettingsPage from "../pages/Dashboard/Settings";
 import DashboardSurveys from "../pages/Dashboard/Surveys";
-import DashboardLayout from "../pages/Dashboard/dashboardLayout";
+import DashboardLayout from "../pages/Dashboard/DashboardLayout";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import LandingPage from "../pages/Landing/Landing";
