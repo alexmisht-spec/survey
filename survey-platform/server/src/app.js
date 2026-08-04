@@ -39,13 +39,26 @@ const __dirname = path.dirname(__filename);
 | Middleware
 |--------------------------------------------------------------------------
 */
+const allowedOrigins =[
+    "http://localhost:5173",
+    "https://surveypool.co.ke",
+    "https://www.surveypool.co.ke",
+];
 
-app.use(
-    cors({
-        origin: "http://localhost:5173",
-        credentials: true,
-    })
-);
+
+app.use(cors({
+    origin(origin, callback) {
+        // Allow server-to-server requests (no Origin header)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+}));
 
 app.use(express.json());
 
