@@ -4,78 +4,116 @@ import {
     FaWallet,
     FaMoneyCheckAlt,
     FaCog,
-    FaGift,
+    FaSignOutAlt,
+    FaChevronLeft,
+    FaChevronRight,
+    FaGift
 } from "react-icons/fa";
 
 import { NavLink } from "react-router-dom";
+import "./Sidebar.css";
 
-import "./MobileBottomNav.css";
+export default function Sidebar({ collapsed, onToggle }) {
 
-export default function MobileBottomNav() {
-
-    const links = [
+    const menu = [
 
         {
             name: "Dashboard",
             icon: <FaHome />,
-            path: "/dashboard",
+            path: "/dashboard"
         },
 
         {
             name: "Surveys",
             icon: <FaClipboardList />,
-            path: "/dashboard/surveys",
+            path: "/dashboard/surveys"
         },
 
         {
             name: "Bonus",
             icon: <FaGift />,
-            path: "/dashboard/bonus",
+            path: "/dashboard/bonus"
         },
 
         {
             name: "Wallet",
             icon: <FaWallet />,
-            path: "/dashboard/wallet",
+            path: "/dashboard/wallet"
         },
 
         {
             name: "Withdraw",
             icon: <FaMoneyCheckAlt />,
-            path: "/dashboard/withdraw",
+            path: "/dashboard/withdraw"
         },
 
         {
             name: "Settings",
             icon: <FaCog />,
-            path: "/dashboard/settings",
-        },
+            path: "/dashboard/settings"
+        }
 
     ];
 
     return (
 
-        <nav className="mobile-bottom-nav">
+        <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
 
-            {links.map((item) => (
+            <div className="sidebar-header">
 
-                <NavLink
-                    key={item.name}
-                    to={item.path}
-                    end={item.path === "/dashboard"}
-                    className={({ isActive }) =>
-                        isActive
-                            ? "mobile-link active"
-                            : "mobile-link"
-                    }
+                <div className="sidebar-logo">
+
+                    <h2>
+                        Survey<span>Pool</span>
+                    </h2>
+
+                </div>
+
+                <button
+                    className="collapse-btn"
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand" : "Collapse"}
+                    type="button"
                 >
-                    {item.icon}
-                    <span>{item.name}</span>
-                </NavLink>
+                    {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
+                </button>
 
-            ))}
+            </div>
 
-        </nav>
+            <nav>
+
+                {menu.map((item) => (
+
+                    <NavLink
+                        key={item.name}
+                        to={item.path}
+                        end={item.path === "/dashboard"}
+                        className={({ isActive }) =>
+                            isActive
+                                ? "sidebar-link active"
+                                : "sidebar-link"
+                        }
+                    >
+
+                        {item.icon}
+
+                        <span>{item.name}</span>
+
+                    </NavLink>
+
+                ))}
+
+            </nav>
+
+            <button className="logout-btn" type="button">
+
+                <FaSignOutAlt />
+
+                <span>Logout</span>
+
+            </button>
+
+        </aside>
 
     );
 
