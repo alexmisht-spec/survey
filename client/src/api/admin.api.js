@@ -48,66 +48,43 @@ export const rejectVerification = (id, reason) => {
 
 /*
 |--------------------------------------------------------------------------
-| VIEW/DOWNLOAD DOCUMENT
+| VIEW DOCUMENT
 |--------------------------------------------------------------------------
 */
-export const openDocument = async (id, type) => {
 
-    const response = await api.get(
+export const openDocument = (id, type) => {
 
-        `/admin/verifications/${id}/document/${type}`,
+    window.open(
 
-        {
-            responseType: "blob"
-        }
+        `${import.meta.env.VITE_API_URL}/admin/verifications/${id}/document/${type}`,
+
+        "_blank",
+
+        "noopener,noreferrer"
 
     );
-
-    const blob = new Blob(
-        [response.data],
-        {
-            type: response.headers["content-type"]
-        }
-    );
-
-    const url = URL.createObjectURL(blob);
-
-    window.open(url, "_blank");
 
 };
-export const downloadDocument = async (id, type, filename) => {
 
-    const response = await api.get(
+/*
+|--------------------------------------------------------------------------
+| DOWNLOAD DOCUMENT
+|--------------------------------------------------------------------------
+*/
 
-        `/admin/verifications/${id}/document/${type}`,
-
-        {
-            responseType: "blob"
-        }
-
-    );
-
-  const blob = new Blob(
-    [response.data],
-    {
-        type: response.headers["content-type"]
-    }
-);
-
-    const url = window.URL.createObjectURL(blob);
+export const downloadDocument = (id, type) => {
 
     const link = document.createElement("a");
 
-    link.href = url;
+    link.href =
+        `${import.meta.env.VITE_API_URL}/admin/verifications/${id}/document/${type}`;
 
-    link.download = filename;
+    link.target = "_blank";
 
     document.body.appendChild(link);
 
     link.click();
 
-    link.remove();
-
-    window.URL.revokeObjectURL(url);
+    document.body.removeChild(link);
 
 };
