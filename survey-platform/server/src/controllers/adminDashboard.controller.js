@@ -6,12 +6,20 @@ export const getAdminDashboard = async (req, res) => {
 
         const [
 
-            users,
+            totalUsers,
+
             verifiedUsers,
+
             pendingVerifications,
+
+            usersWithoutVerification,
+
             activeSurveys,
+
             completedSurveys,
+
             pendingWithdrawals,
+
             wallets
 
         ] = await Promise.all([
@@ -21,62 +29,58 @@ export const getAdminDashboard = async (req, res) => {
             prisma.verification.count({
 
                 where: {
-
-                    status: "APPROVED"
-
-                }
+                    status: "APPROVED",
+                },
 
             }),
 
             prisma.verification.count({
 
                 where: {
+                    status: "PENDING",
+                },
 
-                    status: "PENDING"
+            }),
 
-                }
+            prisma.user.count({
+
+                where: {
+                    verification: null,
+                },
 
             }),
 
             prisma.survey.count({
 
                 where: {
-
-                    status: "ACTIVE"
-
-                }
+                    status: "ACTIVE",
+                },
 
             }),
 
             prisma.surveyResponse.count({
 
                 where: {
-
-                    completed: true
-
-                }
+                    completed: true,
+                },
 
             }),
 
             prisma.withdrawal.count({
 
                 where: {
-
-                    status: "PENDING"
-
-                }
+                    status: "PENDING",
+                },
 
             }),
 
             prisma.wallet.findMany({
 
                 select: {
+                    totalEarned: true,
+                },
 
-                    totalEarned: true
-
-                }
-
-            })
+            }),
 
         ]);
 
@@ -86,17 +90,19 @@ export const getAdminDashboard = async (req, res) => {
 
         }, 0);
 
-        res.json({
+        return res.json({
 
             success: true,
 
             data: {
 
-                users,
+                totalUsers,
 
                 verifiedUsers,
 
                 pendingVerifications,
+
+                usersWithoutVerification,
 
                 activeSurveys,
 
@@ -104,9 +110,9 @@ export const getAdminDashboard = async (req, res) => {
 
                 pendingWithdrawals,
 
-                totalPaid
+                totalPaid,
 
-            }
+            },
 
         });
 
@@ -114,11 +120,10 @@ export const getAdminDashboard = async (req, res) => {
 
         console.error(error);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
-
-            message: "Server Error"
+            message: "Server Error",
 
         });
 

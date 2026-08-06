@@ -51,3 +51,11 @@ export const forgotPasswordSendOTP = (email) =>
 
 export const forgotPasswordReset = (data) =>
     api.post("/auth/forgot-password/reset", data);
+/*
+|--------------------------------------------------------------------------
+| REFRESH ACCESS TOKEN
+|--------------------------------------------------------------------------
+*/
+
+export const refresh = () =>
+    api.post("/auth/refresh");
