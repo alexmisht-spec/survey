@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.js";
-import cloudinary from "../config/cloudinary.js";
+import "../config/cloudinary.js";
 import { uploadToCloudinary } from "../utilis/uploadToCloudinary.js";
 import { createNotification } from "../utilis/notification.js";
 
