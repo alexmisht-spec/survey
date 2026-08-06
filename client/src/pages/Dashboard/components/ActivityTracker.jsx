@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import useAuth from "../hooks/useAuth";
+import useAuth from "../../../hooks/useAuth";
 
 const INACTIVITY_TIME = 30 * 60 * 1000; // 30 minutes
 
