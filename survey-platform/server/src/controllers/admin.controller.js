@@ -1,6 +1,4 @@
 import prisma from "../config/prisma.js";
-import fs from "fs";
-import path from "path";
 import { createNotification } from "../utilis/notification.js";
 /*
 |--------------------------------------------------------------------------
@@ -166,23 +164,22 @@ export const downloadDocument = async (req, res) => {
             return res.status(404).json({
 
                 success: false,
-
                 message: "Verification not found"
 
             });
 
         }
 
-        let filePath;
+        let fileUrl;
 
         switch (req.params.type) {
 
             case "front":
-                filePath = verification.idFront;
+                fileUrl = verification.idFront;
                 break;
 
             case "back":
-                filePath = verification.idBack;
+                fileUrl = verification.idBack;
                 break;
 
             default:
@@ -190,47 +187,24 @@ export const downloadDocument = async (req, res) => {
                 return res.status(400).json({
 
                     success: false,
-
                     message: "Invalid document type"
 
                 });
 
         }
 
-        if (!filePath) {
+        if (!fileUrl) {
 
             return res.status(404).json({
 
                 success: false,
-
-                message: "No document stored"
+                message: "Document not found"
 
             });
 
         }
 
-        // Convert old relative paths to absolute paths
-        if (!path.isAbsolute(filePath)) {
-
-            filePath = path.resolve(filePath);
-
-        }
-
-        console.log("Serving:", filePath);
-
-        if (!fs.existsSync(filePath)) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message: "File not found"
-
-            });
-
-        }
-
-        return res.sendFile(filePath);
+        return res.redirect(fileUrl);
 
     } catch (error) {
 
@@ -239,7 +213,6 @@ export const downloadDocument = async (req, res) => {
         return res.status(500).json({
 
             success: false,
-
             message: "Server Error"
 
         });

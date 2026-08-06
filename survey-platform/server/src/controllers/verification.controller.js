@@ -1,13 +1,11 @@
 import prisma from "../config/prisma.js";
+import cloudinary from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../utilis/uploadToCloudinary.js";
 import { createNotification } from "../utilis/notification.js";
-
-import path from "path";
 
 export const uploadVerification = async (req, res) => {
 
     console.log("===== REQUEST DEBUG =====");
-    console.log("Content-Type:", req.headers["content-type"]);
-    console.log("Body:", req.body);
     console.log("Files:", req.files);
     console.log("=========================");
 
@@ -39,73 +37,129 @@ export const uploadVerification = async (req, res) => {
 
         if (existing) {
 
-            return res.status(400).json({
+            if (existing.status === "PENDING") {
 
-                success: false,
-                message: "Verification already submitted."
+                return res.status(400).json({
 
-            });
+                    success: false,
+                    message: "Your verification is already under review."
+
+                });
+
+            }
+
+            if (existing.status === "APPROVED") {
+
+                return res.status(400).json({
+
+                    success: false,
+                    message: "Your account is already verified."
+
+                });
+
+            }
 
         }
 
         /*
         |--------------------------------------------------------------------------
-        | STORE ABSOLUTE PATHS
+        | UPLOAD TO CLOUDINARY
         |--------------------------------------------------------------------------
         */
 
-        const idFrontPath = path.resolve(req.files.idFront[0].path);
+        const frontUpload = await uploadToCloudinary(
 
-        const idBackPath = path.resolve(req.files.idBack[0].path);
+            req.files.idFront[0].buffer,
 
-        const verification = await prisma.verification.create({
+            "verification"
 
-            data: {
+        );
 
-                userId,
+        const backUpload = await uploadToCloudinary(
 
-                idFront: idFrontPath,
+            req.files.idBack[0].buffer,
 
-                idBack: idBackPath,
+            "verification"
 
-                status: "PENDING"
+        );
 
-            }
+        let verification;
 
-        });
+        if (existing && existing.status === "REJECTED") {
+
+            verification = await prisma.verification.update({
+
+                where: {
+
+                    id: existing.id
+
+                },
+
+                data: {
+
+                    idFront: frontUpload.secure_url,
+
+                    idBack: backUpload.secure_url,
+
+                    status: "PENDING",
+
+                    rejectionReason: null,
+
+                    reviewedBy: null,
+
+                    reviewedAt: null
+
+                }
+
+            });
+
+        } else {
+
+            verification = await prisma.verification.create({
+
+                data: {
+
+                    userId,
+
+                    idFront: frontUpload.secure_url,
+
+                    idBack: backUpload.secure_url,
+
+                    status: "PENDING"
+
+                }
+
+            });
+
+        }
 
         await prisma.user.update({
 
             where: {
+
                 id: userId
+
             },
 
             data: {
+
                 status: "PENDING_VERIFICATION"
+
             }
 
         });
 
-        try {
+        await createNotification({
 
-            await createNotification({
+            userId,
 
-                userId,
+            title: "Verification Submitted",
 
-                title: "Verification Submitted",
+            message: "Your verification documents have been submitted successfully. We will review them shortly.",
 
-                message:
-                    "Your verification documents have been submitted successfully. We will review them shortly.",
+            type: "INFO"
 
-                type: "INFO"
-
-            });
-
-        } catch (err) {
-
-            console.error("Notification Error:", err);
-
-        }
+        });
 
         return res.status(201).json({
 
