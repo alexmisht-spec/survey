@@ -52,11 +52,29 @@ export const rejectVerification = (id, reason) => {
 |--------------------------------------------------------------------------
 */
 
-export const openDocument = (id, type) => {
+/*
+|--------------------------------------------------------------------------
+| VIEW DOCUMENT
+|--------------------------------------------------------------------------
+*/
+
+export const openDocument = async (id, type) => {
+
+    const { data } = await api.get(
+
+        `/admin/verifications/${id}/document/${type}`
+
+    );
+
+    if (!data.success) {
+
+        throw new Error(data.message);
+
+    }
 
     window.open(
 
-        `${import.meta.env.VITE_API_URL}/admin/verifications/${id}/document/${type}`,
+        data.url,
 
         "_blank",
 
@@ -72,14 +90,27 @@ export const openDocument = (id, type) => {
 |--------------------------------------------------------------------------
 */
 
-export const downloadDocument = (id, type) => {
+export const downloadDocument = async (id, type) => {
+
+    const { data } = await api.get(
+
+        `/admin/verifications/${id}/document/${type}`
+
+    );
+
+    if (!data.success) {
+
+        throw new Error(data.message);
+
+    }
 
     const link = document.createElement("a");
 
-    link.href =
-        `${import.meta.env.VITE_API_URL}/admin/verifications/${id}/document/${type}`;
+    link.href = data.url;
 
     link.target = "_blank";
+
+    link.rel = "noopener noreferrer";
 
     document.body.appendChild(link);
 
