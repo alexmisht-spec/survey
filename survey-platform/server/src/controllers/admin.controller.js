@@ -146,7 +146,6 @@ export const getVerification = async (req, res) => {
     }
 
 };
-
 export const downloadDocument = async (req, res) => {
 
     try {
@@ -204,8 +203,10 @@ export const downloadDocument = async (req, res) => {
 
         }
 
-        // Ensure it's a valid URL
-        if (!fileUrl.startsWith("http://") && !fileUrl.startsWith("https://")) {
+        if (
+            !fileUrl.startsWith("http://") &&
+            !fileUrl.startsWith("https://")
+        ) {
 
             return res.status(400).json({
 
@@ -216,7 +217,13 @@ export const downloadDocument = async (req, res) => {
 
         }
 
-        return res.redirect(fileUrl);
+        return res.json({
+
+            success: true,
+
+            url: fileUrl
+
+        });
 
     } catch (error) {
 
