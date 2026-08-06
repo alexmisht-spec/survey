@@ -173,11 +173,9 @@ export const downloadDocument = async (req, res) => {
 
         }
 
-        const { type } = req.params;
-
         let filePath;
 
-        switch (type) {
+        switch (req.params.type) {
 
             case "front":
                 filePath = verification.idFront;
@@ -199,7 +197,28 @@ export const downloadDocument = async (req, res) => {
 
         }
 
-        if (!filePath || !fs.existsSync(filePath)) {
+        if (!filePath) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: "No document stored"
+
+            });
+
+        }
+
+        // Convert old relative paths to absolute paths
+        if (!path.isAbsolute(filePath)) {
+
+            filePath = path.resolve(filePath);
+
+        }
+
+        console.log("Serving:", filePath);
+
+        if (!fs.existsSync(filePath)) {
 
             return res.status(404).json({
 
@@ -211,7 +230,7 @@ export const downloadDocument = async (req, res) => {
 
         }
 
-        return res.sendFile(path.resolve(filePath));
+        return res.sendFile(filePath);
 
     } catch (error) {
 

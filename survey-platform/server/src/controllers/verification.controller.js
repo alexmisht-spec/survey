@@ -1,6 +1,8 @@
 import prisma from "../config/prisma.js";
 import { createNotification } from "../utilis/notification.js";
 
+import path from "path";
+
 export const uploadVerification = async (req, res) => {
 
     console.log("===== REQUEST DEBUG =====");
@@ -17,10 +19,14 @@ export const uploadVerification = async (req, res) => {
             !req.files?.idFront ||
             !req.files?.idBack
         ) {
+
             return res.status(400).json({
+
                 success: false,
                 message: "Upload both front and back of your National ID."
+
             });
+
         }
 
         const existing = await prisma.verification.findUnique({
@@ -34,11 +40,23 @@ export const uploadVerification = async (req, res) => {
         if (existing) {
 
             return res.status(400).json({
+
                 success: false,
                 message: "Verification already submitted."
+
             });
 
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | STORE ABSOLUTE PATHS
+        |--------------------------------------------------------------------------
+        */
+
+        const idFrontPath = path.resolve(req.files.idFront[0].path);
+
+        const idBackPath = path.resolve(req.files.idBack[0].path);
 
         const verification = await prisma.verification.create({
 
@@ -46,9 +64,9 @@ export const uploadVerification = async (req, res) => {
 
                 userId,
 
-                idFront: req.files.idFront[0].path,
+                idFront: idFrontPath,
 
-                idBack: req.files.idBack[0].path,
+                idBack: idBackPath,
 
                 status: "PENDING"
 
