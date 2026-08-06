@@ -1,5 +1,5 @@
 import streamifier from "streamifier";
-import cloudinary from "../config/cloudinary";
+import cloudinary from "../config/cloudinary.js";
 
 export function uploadToCloudinary(buffer, folder) {
 
