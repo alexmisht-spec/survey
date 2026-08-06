@@ -14,6 +14,8 @@ export const getAdminDashboard = async (req, res) => {
 
             usersWithoutVerification,
 
+            awaitingVerification,
+
             activeSurveys,
 
             completedSurveys,
@@ -24,63 +26,162 @@ export const getAdminDashboard = async (req, res) => {
 
         ] = await Promise.all([
 
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL USERS
+            |--------------------------------------------------------------------------
+            */
+
             prisma.user.count(),
 
-            prisma.verification.count({
-
-                where: {
-                    status: "APPROVED",
-                },
-
-            }),
+            /*
+            |--------------------------------------------------------------------------
+            | VERIFIED USERS
+            |--------------------------------------------------------------------------
+            */
 
             prisma.verification.count({
 
                 where: {
-                    status: "PENDING",
-                },
+                    status: "APPROVED"
+                }
 
             }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | PENDING VERIFICATIONS
+            |--------------------------------------------------------------------------
+            */
+
+            prisma.verification.count({
+
+                where: {
+                    status: "PENDING"
+                }
+
+            }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | USERS WHO HAVE NOT SUBMITTED DOCUMENTS
+            |--------------------------------------------------------------------------
+            */
 
             prisma.user.count({
 
                 where: {
-                    verification: null,
-                },
+
+                    verification: {
+
+                        is: null
+
+                    }
+
+                }
 
             }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | USERS STILL NEEDING VERIFICATION ACTION
+            | (No documents OR Pending verification)
+            |--------------------------------------------------------------------------
+            */
+
+            prisma.user.count({
+
+                where: {
+
+                    OR: [
+
+                        {
+
+                            verification: {
+
+                                is: null
+
+                            }
+
+                        },
+
+                        {
+
+                            verification: {
+
+                                is: {
+
+                                    status: "PENDING"
+
+                                }
+
+                            }
+
+                        }
+
+                    ]
+
+                }
+
+            }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | ACTIVE SURVEYS
+            |--------------------------------------------------------------------------
+            */
 
             prisma.survey.count({
 
                 where: {
-                    status: "ACTIVE",
-                },
+                    status: "ACTIVE"
+                }
 
             }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMPLETED SURVEYS
+            |--------------------------------------------------------------------------
+            */
 
             prisma.surveyResponse.count({
 
                 where: {
-                    completed: true,
-                },
+                    completed: true
+                }
 
             }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | PENDING WITHDRAWALS
+            |--------------------------------------------------------------------------
+            */
 
             prisma.withdrawal.count({
 
                 where: {
-                    status: "PENDING",
-                },
+                    status: "PENDING"
+                }
 
             }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL PAID
+            |--------------------------------------------------------------------------
+            */
 
             prisma.wallet.findMany({
 
                 select: {
-                    totalEarned: true,
-                },
 
-            }),
+                    totalEarned: true
+
+                }
+
+            })
 
         ]);
 
@@ -104,26 +205,31 @@ export const getAdminDashboard = async (req, res) => {
 
                 usersWithoutVerification,
 
+                awaitingVerification,
+
                 activeSurveys,
 
                 completedSurveys,
 
                 pendingWithdrawals,
 
-                totalPaid,
+                totalPaid
 
-            },
+            }
 
         });
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 
         return res.status(500).json({
 
             success: false,
-            message: "Server Error",
+
+            message: "Server Error"
 
         });
 

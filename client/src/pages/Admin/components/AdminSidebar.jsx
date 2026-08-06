@@ -1,101 +1,41 @@
 import { NavLink } from "react-router-dom";
-
 import {
-    FaChartPie,
-    FaUsers,
-    FaClipboardList,
-    FaMoneyBillWave,
-    FaChartBar,
-    FaCog,
-    FaGift,
-    FaSignOutAlt,
+  FaChartPie, FaUsers, FaClipboardList, FaMoneyBillWave,
+  FaChartBar, FaCog, FaGift, FaSignOutAlt,
 } from "react-icons/fa";
-
 import useAuth from "../../../hooks/useAuth";
+import "./AdminSidebar.css"
 
 export default function AdminSidebar() {
+  const { logout } = useAuth();
 
-    const { logout } = useAuth();
+  const navItems = [
+    { to: "/admin/dashboard", icon: <FaChartPie />, label: "Dashboard" },
+    { to: "/admin/users", icon: <FaUsers />, label: "Users" },
+    { to: "/admin/surveys", icon: <FaClipboardList />, label: "Surveys" },
+    { to: "/admin/withdrawals", icon: <FaMoneyBillWave />, label: "Withdrawals" },
+    { to: "/admin/reward-credentials", icon: <FaGift />, label: "Reward Credentials" },
+    { to: "/admin/reports", icon: <FaChartBar />, label: "Reports" },
+    { to: "/admin/settings", icon: <FaCog />, label: "Settings" },
+  ];
 
-    return (
+  return (
+    <aside className="admin-sidebar">
+      <h2 className="logo">Survey Admin</h2>
 
-        <aside className="admin-sidebar">
+      <nav className="sidebar-nav">
+        {navItems.map((item) => (
+          <NavLink key={item.to} to={item.to}>
+            {item.icon}
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
 
-            <h2 className="logo">
-
-                Survey Admin
-
-            </h2>
-
-            <NavLink to="/admin/dashboard">
-
-                <FaChartPie />
-
-                Dashboard
-
-            </NavLink>
-
-            <NavLink to="/admin/users">
-
-                <FaUsers />
-
-                Users
-
-            </NavLink>
-
-            <NavLink to="/admin/surveys">
-
-                <FaClipboardList />
-
-                Surveys
-
-            </NavLink>
-
-            <NavLink to="/admin/withdrawals">
-
-                <FaMoneyBillWave />
-
-                Withdrawals
-
-            </NavLink>
-
-            <NavLink to="/admin/reward-credentials">
-
-                <FaGift />
-
-                Reward Credentials
-
-            </NavLink>
-
-            <NavLink to="/admin/reports">
-
-                <FaChartBar />
-
-                Reports
-
-            </NavLink>
-
-            <NavLink to="/admin/settings">
-
-                <FaCog />
-
-                Settings
-
-            </NavLink>
-
-            <button
-                className="logout-btn"
-                onClick={logout}
-            >
-
-                <FaSignOutAlt />
-
-                Logout
-
-            </button>
-
-        </aside>
-
-    );
-
+      <button className="logout-btn" onClick={logout}>
+        <FaSignOutAlt />
+        <span>Logout</span>
+      </button>
+    </aside>
+  );
 }

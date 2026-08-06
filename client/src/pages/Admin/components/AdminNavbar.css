@@ -1,0 +1,76 @@
+/* ============================================
+   ADMIN NAVBAR
+   ============================================ */
+
+.admin-navbar {
+  height: 64px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Left side — Title */
+.admin-navbar h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+/* Right side — User welcome */
+.admin-navbar > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.admin-navbar > div strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Optional: Add a subtle avatar circle before the name */
+.admin-navbar > div::before {
+  content: "";
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .admin-navbar {
+    padding: 0 1rem;
+    height: 56px;
+  }
+
+  .admin-navbar h1 {
+    font-size: 1rem;
+  }
+
+  .admin-navbar > div {
+    font-size: 0.875rem;
+  }
+
+  /* Hide the avatar circle on small screens if needed */
+  .admin-navbar > div::before {
+    display: none;
+  }
+}

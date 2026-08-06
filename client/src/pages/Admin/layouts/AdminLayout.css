@@ -1,0 +1,179 @@
+/* ============================================
+   ADMIN LAYOUT — Modern Dashboard CSS
+   ============================================ */
+
+/* CSS Custom Properties for easy theming */
+:root {
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 70px;
+  --navbar-height: 64px;
+  --transition-speed: 0.3s;
+  
+  /* Colors */
+  --bg-body: #f3f4f6;
+  --bg-sidebar: #1e293b;
+  --bg-navbar: #ffffff;
+  --bg-content: #f8fafc;
+  --text-sidebar: #94a3b8;
+  --text-sidebar-active: #ffffff;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-body);
+  color: #1e293b;
+}
+
+/* ============================================
+   MAIN LAYOUT GRID
+   ============================================ */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ============================================
+   SIDEBAR (fixed left)
+   ============================================ */
+.admin-sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--bg-sidebar);
+  color: var(--text-sidebar);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-speed) ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Sidebar scrollbar styling */
+.admin-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+.admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background-color: #475569;
+  border-radius: 20px;
+}
+
+/* ============================================
+   MAIN AREA (right side)
+   ============================================ */
+.admin-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left var(--transition-speed) ease;
+}
+
+/* ============================================
+   NAVBAR (sticky top)
+   ============================================ */
+.admin-navbar {
+  height: var(--navbar-height);
+  background-color: var(--bg-navbar);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   CONTENT AREA (scrollable)
+   ============================================ */
+.admin-content {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: var(--bg-content);
+  overflow-y: auto;
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+/* Content wrapper for max-width if needed */
+.admin-content > * {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Tablet: slightly narrower sidebar */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 240px;
+  }
+}
+
+/* Mobile: sidebar becomes overlay */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+  }
+  
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .admin-main {
+    margin-left: 0;
+  }
+  
+  .admin-content {
+    padding: 1rem;
+  }
+}
+
+/* Optional: Collapsed sidebar state (desktop) */
+.admin-layout.collapsed .admin-sidebar {
+  width: var(--sidebar-collapsed);
+}
+
+.admin-layout.collapsed .admin-main {
+  margin-left: var(--sidebar-collapsed);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  .overlay.active {
+    display: block;
+  }
+}

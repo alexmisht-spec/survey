@@ -11,33 +11,71 @@ export const getPendingVerifications = async (req, res) => {
 
     try {
 
-        const users = await prisma.verification.findMany({
+        const [
 
-            where: {
-                status: "PENDING"
-            },
+            pendingVerifications,
 
-            include: {
-                user: true
-            },
+            unverifiedUsers
 
-            orderBy: {
-                createdAt: "desc"
-            }
+        ] = await Promise.all([
 
-        });
+            prisma.verification.findMany({
+
+                where: {
+
+                    status: "PENDING"
+
+                },
+
+                include: {
+
+                    user: true
+
+                },
+
+                orderBy: {
+
+                    createdAt: "desc"
+
+                }
+
+            }),
+
+            prisma.user.findMany({
+
+                where: {
+
+                    verification: {
+
+                        is: null
+
+                    }
+
+                },
+
+                orderBy: {
+
+                    createdAt: "desc"
+
+                }
+
+            })
+
+        ]);
 
         return res.json({
 
             success: true,
 
-            total: users.length,
+            pendingVerifications,
 
-            users
+            unverifiedUsers
 
         });
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getPendingVerifications } from "../../api/admin.api";
 import UserDetailsModal from "./components/UserDetailsModal";
+import "./Users.css"
 
 export default function Users() {
 
