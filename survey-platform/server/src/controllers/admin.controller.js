@@ -204,10 +204,23 @@ export const downloadDocument = async (req, res) => {
 
         }
 
+        // Ensure it's a valid URL
+        if (!fileUrl.startsWith("http://") && !fileUrl.startsWith("https://")) {
+
+            return res.status(400).json({
+
+                success: false,
+                message: "Invalid document URL"
+
+            });
+
+        }
+
         return res.redirect(fileUrl);
 
     } catch (error) {
 
+        console.error("DOWNLOAD DOCUMENT ERROR");
         console.error(error);
 
         return res.status(500).json({
