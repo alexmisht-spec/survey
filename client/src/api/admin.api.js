@@ -52,65 +52,27 @@ export const rejectVerification = (id, reason) => {
 |--------------------------------------------------------------------------
 */
 
-/*
-|--------------------------------------------------------------------------
-| VIEW DOCUMENT
-|--------------------------------------------------------------------------
-*/
-
 export const openDocument = async (id, type) => {
 
     const { data } = await api.get(
-
         `/admin/verifications/${id}/document/${type}`
-
     );
 
-    if (!data.success) {
-
-        throw new Error(data.message);
-
-    }
-
-    window.open(
-
-        data.url,
-
-        "_blank",
-
-        "noopener,noreferrer"
-
-    );
+    window.open(data.url, "_blank", "noopener,noreferrer");
 
 };
-
-/*
-|--------------------------------------------------------------------------
-| DOWNLOAD DOCUMENT
-|--------------------------------------------------------------------------
-*/
 
 export const downloadDocument = async (id, type) => {
 
     const { data } = await api.get(
-
         `/admin/verifications/${id}/document/${type}`
-
     );
-
-    if (!data.success) {
-
-        throw new Error(data.message);
-
-    }
 
     const link = document.createElement("a");
 
     link.href = data.url;
 
     link.target = "_blank";
-
-    link.rel = "noopener noreferrer";
 
     document.body.appendChild(link);
 
