@@ -1,0 +1,267 @@
+/* ============================================
+   SURVEYS PAGE
+   ============================================ */
+
+/* Use .admin-page wrapper — replace style={{padding:30}} with className="admin-page" */
+.admin-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.admin-page > h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* "New Survey" button next to heading */
+.admin-page > h1 + button,
+.admin-page > button:first-of-type {
+  padding: 10px 20px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.admin-page > h1 + button:hover,
+.admin-page > button:first-of-type:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   TABLE — override the border="1" look
+   ============================================ */
+.admin-page table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.admin-page table thead {
+  background: #f9fafb;
+}
+
+.admin-page table thead th {
+  text-align: left;
+  padding: 14px 18px;
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.admin-page table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-page table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.admin-page table tbody td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.admin-page table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Remove default table border attribute styling */
+.admin-page table[border="1"],
+.admin-page table[border="1"] td,
+.admin-page table[border="1"] th {
+  border: none;
+}
+
+/* ============================================
+   STATUS BADGES
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-secondary {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* ============================================
+   ACTION BUTTONS (View, Edit, Activate, Delete, Assign)
+   ============================================ */
+.admin-page table tbody td:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-page table tbody td:last-child button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+/* View — neutral */
+.admin-page table tbody td:last-child button:nth-child(1) {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.admin-page table tbody td:last-child button:nth-child(1):hover {
+  background: #e5e7eb;
+}
+
+/* Edit — primary blue */
+.admin-page table tbody td:last-child button:nth-child(3) {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.admin-page table tbody td:last-child button:nth-child(3):hover {
+  background: #dbeafe;
+}
+
+/* Activate — success green */
+.admin-page table tbody td:last-child button:nth-child(5) {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.admin-page table tbody td:last-child button:nth-child(5):hover {
+  background: #d1fae5;
+}
+
+/* Activate disabled state */
+.admin-page table tbody td:last-child button:nth-child(5):disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Delete — danger red */
+.admin-page table tbody td:last-child button:nth-child(7) {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.admin-page table tbody td:last-child button:nth-child(7):hover {
+  background: #fee2e2;
+}
+
+/* Assign — purple */
+.admin-page table tbody td:last-child button:nth-child(9) {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.admin-page table tbody td:last-child button:nth-child(9):hover {
+  background: #ede9fe;
+}
+
+/* View Assignments — teal */
+.admin-page table tbody td:last-child button:nth-child(11) {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+.admin-page table tbody td:last-child button:nth-child(11):hover {
+  background: #ccfbf1;
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+.admin-page > h2:first-child {
+  text-align: center;
+  color: #6b7280;
+  padding: 80px 20px;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 20px;
+  }
+
+  .admin-page > h1 {
+    font-size: 1.4rem;
+  }
+
+  .admin-page table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .admin-page table tbody td:last-child {
+    min-width: 280px;
+  }
+}

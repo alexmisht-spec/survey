@@ -4,7 +4,7 @@ import CreateSurveyModal from "./components/CreateSurveyModal";
 import ViewSurveyModal from "./components/ViewSurveyModal";
 import AssignSurveyModal from "./components/AssignSurveyMOdal";
 import SurveyAssignments from "./SurveyAssignments";
-
+import "./AdminSurveys.css"
 
 import {
     getSurveys,
