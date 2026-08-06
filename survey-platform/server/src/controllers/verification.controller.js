@@ -3,6 +3,20 @@ import cloudinary from "../config/cloudinary.js";
 import { uploadToCloudinary } from "../utilis/uploadToCloudinary.js";
 import { createNotification } from "../utilis/notification.js";
 
+function getPublicId(url) {
+
+    if (!url) return null;
+
+    const parts = url.split("/upload/");
+
+    if (parts.length < 2) return null;
+
+    return parts[1]
+        .replace(/^v\d+\//, "")
+        .replace(/\.[^/.]+$/, "");
+
+}
+
 export const uploadVerification = async (req, res) => {
 
     console.log("===== REQUEST DEBUG =====");
@@ -59,11 +73,32 @@ export const uploadVerification = async (req, res) => {
 
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE OLD REJECTED DOCUMENTS FROM CLOUDINARY
+            |--------------------------------------------------------------------------
+            */
+
+            const frontPublicId = getPublicId(existing.idFront);
+            const backPublicId = getPublicId(existing.idBack);
+
+            if (frontPublicId) {
+
+                await cloudinary.uploader.destroy(frontPublicId).catch(console.error);
+
+            }
+
+            if (backPublicId) {
+
+                await cloudinary.uploader.destroy(backPublicId).catch(console.error);
+
+            }
+
         }
 
         /*
         |--------------------------------------------------------------------------
-        | UPLOAD TO CLOUDINARY
+        | UPLOAD NEW DOCUMENTS TO CLOUDINARY
         |--------------------------------------------------------------------------
         */
 
@@ -165,7 +200,9 @@ export const uploadVerification = async (req, res) => {
 
             success: true,
 
-            message: "Verification submitted successfully.",
+            message: existing && existing.status === "REJECTED"
+                ? "Verification resubmitted successfully."
+                : "Verification submitted successfully.",
 
             verification
 
