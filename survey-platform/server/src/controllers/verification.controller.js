@@ -1,6 +1,6 @@
 import prisma from "../config/prisma.js";
 import cloudinary from "../config/cloudinary.js";
-import { uploadToCloudinary } from "../utilis/uploadToCloudinary.js";
+import fs from "fs";
 import { createNotification } from "../utilis/notification.js";
 
 function getPublicId(url) {
@@ -75,7 +75,7 @@ export const uploadVerification = async (req, res) => {
 
             /*
             |--------------------------------------------------------------------------
-            | DELETE OLD REJECTED DOCUMENTS FROM CLOUDINARY
+            | DELETE OLD CLOUDINARY FILES
             |--------------------------------------------------------------------------
             */
 
@@ -98,25 +98,47 @@ export const uploadVerification = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | UPLOAD NEW DOCUMENTS TO CLOUDINARY
+        | UPLOAD TO CLOUDINARY FROM TEMP FILE
         |--------------------------------------------------------------------------
         */
 
-        const frontUpload = await uploadToCloudinary(
+        const frontUpload = await cloudinary.uploader.upload(
 
-            req.files.idFront[0].buffer,
+            req.files.idFront[0].path,
 
-            "verification"
+            {
+
+                folder: "verification",
+
+                resource_type: "auto"
+
+            }
+
+        );
+
+        const backUpload = await cloudinary.uploader.upload(
+
+            req.files.idBack[0].path,
+
+            {
+
+                folder: "verification",
+
+                resource_type: "auto"
+
+            }
 
         );
 
-        const backUpload = await uploadToCloudinary(
+        /*
+        |--------------------------------------------------------------------------
+        | DELETE TEMP FILES FROM SERVER
+        |--------------------------------------------------------------------------
+        */
 
-            req.files.idBack[0].buffer,
+        await fs.promises.unlink(req.files.idFront[0].path).catch(console.error);
 
-            "verification"
-
-        );
+        await fs.promises.unlink(req.files.idBack[0].path).catch(console.error);
 
         let verification;
 
@@ -200,9 +222,10 @@ export const uploadVerification = async (req, res) => {
 
             success: true,
 
-            message: existing && existing.status === "REJECTED"
-                ? "Verification resubmitted successfully."
-                : "Verification submitted successfully.",
+            message:
+                existing && existing.status === "REJECTED"
+                    ? "Verification resubmitted successfully."
+                    : "Verification submitted successfully.",
 
             verification
 
@@ -211,6 +234,24 @@ export const uploadVerification = async (req, res) => {
     } catch (error) {
 
         console.error(error);
+
+        /*
+        |--------------------------------------------------------------------------
+        | CLEAN UP TEMP FILES IF UPLOAD FAILS
+        |--------------------------------------------------------------------------
+        */
+
+        if (req.files?.idFront?.[0]?.path) {
+
+            await fs.promises.unlink(req.files.idFront[0].path).catch(() => {});
+
+        }
+
+        if (req.files?.idBack?.[0]?.path) {
+
+            await fs.promises.unlink(req.files.idBack[0].path).catch(() => {});
+
+        }
 
         return res.status(500).json({
 
