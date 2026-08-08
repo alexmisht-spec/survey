@@ -1,4 +1,6 @@
+
 import { useEffect, useState } from "react";
+
 import {
     FaWallet,
     FaArrowCircleDown,
@@ -20,17 +22,46 @@ export default function Withdraw() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
+    /*
+    |--------------------------------------------------------------------------
+    | LOAD DASHBOARD DATA
+    |--------------------------------------------------------------------------
+    */
+
     const loadData = async () => {
 
         try {
 
+            setLoading(true);
+
             const res = await getDashboard();
+
+            console.log(
+                "===== WITHDRAW DASHBOARD DATA ====="
+            );
+
+            console.log(res.data);
+
+            console.log(
+                "==================================="
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Your dashboard response appears to use:
+            |
+            | res.data.data
+            |--------------------------------------------------------------------------
+            */
 
             setWallet(res.data.data);
 
         } catch (err) {
 
-            console.error(err);
+            console.error(
+                "WITHDRAW DASHBOARD ERROR:",
+                err
+            );
 
         } finally {
 
@@ -46,34 +77,136 @@ export default function Withdraw() {
 
     }, []);
 
-    const available = Number(wallet?.availableBalance || 0);
-    const pending = Number(wallet?.pendingBalance || 0);
-    const earned = Number(wallet?.totalEarned || 0);
+    /*
+    |--------------------------------------------------------------------------
+    | WALLET VALUES
+    |--------------------------------------------------------------------------
+    */
 
-    const withdrawals = wallet?.withdrawals || [];
+    const available =
+        Number(wallet?.availableBalance || 0);
+
+    const pending =
+        Number(wallet?.pendingBalance || 0);
+
+    const earned =
+        Number(wallet?.totalEarned || 0);
+
+    /*
+    |--------------------------------------------------------------------------
+    | WITHDRAWALS
+    |--------------------------------------------------------------------------
+    */
+
+    const withdrawals =
+        wallet?.withdrawals || [];
+
+    /*
+    |--------------------------------------------------------------------------
+    | M-PESA NUMBER
+    |--------------------------------------------------------------------------
+    |
+    | IMPORTANT:
+    |
+    | We are no longer using:
+    |
+    | wallet.profile.mpesaNumber
+    |
+    | because your registration stores the user's phone number
+    | directly in User.phone.
+    |
+    | We support several possible dashboard response structures
+    | so the frontend remains compatible with your API.
+    |
+    */
 
     const mpesa =
+        wallet?.user?.phone ||
+        wallet?.phone ||
         wallet?.profile?.mpesaNumber ||
         "No M-Pesa Number";
 
+    /*
+    |--------------------------------------------------------------------------
+    | WITHDRAW ALL
+    |--------------------------------------------------------------------------
+    */
+
     const withdrawAll = () => {
 
-        setAmount(available);
+        if (available > 0) {
+
+            setAmount(available.toString());
+
+        }
 
     };
 
+    /*
+    |--------------------------------------------------------------------------
+    | REMAINING BALANCE
+    |--------------------------------------------------------------------------
+    */
+
     const remaining = Math.max(
+
         0,
+
         available - Number(amount || 0)
+
     );
+
+    /*
+    |--------------------------------------------------------------------------
+    | SUBMIT WITHDRAWAL
+    |--------------------------------------------------------------------------
+    */
 
     const submitWithdrawal = async (e) => {
 
         e.preventDefault();
 
-        if (!amount) {
+        const withdrawalAmount =
+            Number(amount);
 
-            return alert("Enter withdrawal amount.");
+        if (!withdrawalAmount) {
+
+            return alert(
+                "Enter withdrawal amount."
+            );
+
+        }
+
+        if (withdrawalAmount < 100) {
+
+            return alert(
+                "Minimum withdrawal is KSh 100."
+            );
+
+        }
+
+        if (withdrawalAmount > available) {
+
+            return alert(
+                "You cannot withdraw more than your available balance."
+            );
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | M-PESA NUMBER CHECK
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !mpesa ||
+            mpesa === "No M-Pesa Number"
+        ) {
+
+            return alert(
+                "No registered M-Pesa number was found. Please update your phone number in Settings."
+            );
 
         }
 
@@ -81,13 +214,16 @@ export default function Withdraw() {
 
             setSubmitting(true);
 
-            const res = await requestWithdrawal({
+            const res =
+                await requestWithdrawal({
 
-                amount: Number(amount),
+                    amount: withdrawalAmount,
 
-            });
+                });
 
-            alert(res.data.message);
+            alert(
+                res.data.message
+            );
 
             setAmount("");
 
@@ -95,7 +231,10 @@ export default function Withdraw() {
 
         } catch (err) {
 
-            console.error(err);
+            console.error(
+                "WITHDRAWAL ERROR:",
+                err
+            );
 
             alert(
 
@@ -112,20 +251,108 @@ export default function Withdraw() {
         }
 
     };
-function statusBadge(status) {
-    const styles = {
-        PENDING:    { class: "status-badge status-pending",    text: "Pending Approval" },
-        APPROVED:   { class: "status-badge status-processing", text: "Processing Payment" },
-        PROCESSING: { class: "status-badge status-processing", text: "Processing Payment" },
-        PAID:       { class: "status-badge status-paid",       text: "Paid" },
-        FAILED:     { class: "status-badge status-failed",     text: "Payment Failed" },
-        REJECTED:   { class: "status-badge status-rejected",   text: "Rejected" },
-    };
 
-    const s = styles[status] || { class: "status-badge", text: status };
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS BADGE
+    |--------------------------------------------------------------------------
+    */
 
-    return <span className={s.class}>{s.text}</span>;
-}
+    function statusBadge(status) {
+
+        const styles = {
+
+            PENDING: {
+
+                class:
+                    "status-badge status-pending",
+
+                text:
+                    "Pending Approval"
+
+            },
+
+            APPROVED: {
+
+                class:
+                    "status-badge status-processing",
+
+                text:
+                    "Processing Payment"
+
+            },
+
+            PROCESSING: {
+
+                class:
+                    "status-badge status-processing",
+
+                text:
+                    "Processing Payment"
+
+            },
+
+            PAID: {
+
+                class:
+                    "status-badge status-paid",
+
+                text:
+                    "Paid"
+
+            },
+
+            FAILED: {
+
+                class:
+                    "status-badge status-failed",
+
+                text:
+                    "Payment Failed"
+
+            },
+
+            REJECTED: {
+
+                class:
+                    "status-badge status-rejected",
+
+                text:
+                    "Rejected"
+
+            }
+
+        };
+
+        const s =
+            styles[status] || {
+
+                class:
+                    "status-badge",
+
+                text:
+                    status
+
+            };
+
+        return (
+
+            <span className={s.class}>
+
+                {s.text}
+
+            </span>
+
+        );
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOADING
+    |--------------------------------------------------------------------------
+    */
+
     if (loading) {
 
         return (
@@ -134,7 +361,9 @@ function statusBadge(status) {
 
                 <div className="withdraw-spinner"></div>
 
-                <p>Loading your wallet...</p>
+                <p>
+                    Loading your wallet...
+                </p>
 
             </div>
 
@@ -142,19 +371,30 @@ function statusBadge(status) {
 
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | PAGE
+    |--------------------------------------------------------------------------
+    */
+
     return (
 
         <div className="withdraw-page">
+
+            {/* HEADER */}
 
             <div className="withdraw-header">
 
                 <div>
 
-                    <h1>Withdraw Earnings</h1>
+                    <h1>
+                        Withdraw Earnings
+                    </h1>
 
                     <p>
 
-                        Send your survey earnings directly to your registered
+                        Send your survey earnings
+                        directly to your registered
                         M-Pesa account.
 
                     </p>
@@ -163,45 +403,62 @@ function statusBadge(status) {
 
             </div>
 
+
+            {/* WALLET SUMMARY */}
+
             <div className="wallet-summary">
 
                 <div className="wallet-card blue">
 
                     <FaWallet />
 
-                    <span>Available Balance</span>
+                    <span>
+                        Available Balance
+                    </span>
 
                     <h2>
 
-                        KSh {available.toLocaleString()}
+                        KSh{" "}
+
+                        {available.toLocaleString()}
 
                     </h2>
 
                 </div>
+
 
                 <div className="wallet-card orange">
 
                     <FaMoneyBillWave />
 
-                    <span>Pending Balance</span>
+                    <span>
+                        Pending Balance
+                    </span>
 
                     <h2>
 
-                        KSh {pending.toLocaleString()}
+                        KSh{" "}
+
+                        {pending.toLocaleString()}
 
                     </h2>
 
                 </div>
 
+
                 <div className="wallet-card green">
 
                     <FaBolt />
 
-                    <span>Total Earned</span>
+                    <span>
+                        Total Earned
+                    </span>
 
                     <h2>
 
-                        KSh {earned.toLocaleString()}
+                        KSh{" "}
+
+                        {earned.toLocaleString()}
 
                     </h2>
 
@@ -209,7 +466,13 @@ function statusBadge(status) {
 
             </div>
 
+
+            {/* MAIN GRID */}
+
             <div className="withdraw-grid">
+
+
+                {/* WITHDRAW FORM */}
 
                 <div className="withdraw-form-card">
 
@@ -217,11 +480,21 @@ function statusBadge(status) {
 
                         <FaArrowCircleDown />
 
-                        <h2>Request Withdrawal</h2>
+                        <h2>
+                            Request Withdrawal
+                        </h2>
 
                     </div>
 
-                    <form onSubmit={submitWithdrawal}>
+
+                    <form
+                        onSubmit={
+                            submitWithdrawal
+                        }
+                    >
+
+
+                        {/* M-PESA NUMBER */}
 
                         <label>
 
@@ -229,19 +502,28 @@ function statusBadge(status) {
 
                         </label>
 
+
                         <div className="readonly-input">
 
                             <FaMobileAlt />
 
-                            <span>{mpesa}</span>
+                            <span>
+
+                                {mpesa}
+
+                            </span>
 
                         </div>
+
+
+                        {/* AMOUNT */}
 
                         <label>
 
                             Withdrawal Amount
 
                         </label>
+
 
                         <input
 
@@ -250,7 +532,9 @@ function statusBadge(status) {
                             value={amount}
 
                             onChange={(e) =>
-                                setAmount(e.target.value)
+                                setAmount(
+                                    e.target.value
+                                )
                             }
 
                             placeholder="Minimum KSh 100"
@@ -261,35 +545,39 @@ function statusBadge(status) {
 
                         />
 
+
+                        {/* BALANCE INFORMATION */}
+
                         <div className="withdraw-info">
 
                             <div>
 
                                 <span>
-
                                     Available
-
                                 </span>
 
                                 <strong>
 
-                                    KSh {available.toLocaleString()}
+                                    KSh{" "}
+
+                                    {available.toLocaleString()}
 
                                 </strong>
 
                             </div>
 
+
                             <div>
 
                                 <span>
-
                                     Remaining
-
                                 </span>
 
                                 <strong>
 
-                                    KSh {remaining.toLocaleString()}
+                                    KSh{" "}
+
+                                    {remaining.toLocaleString()}
 
                                 </strong>
 
@@ -297,25 +585,61 @@ function statusBadge(status) {
 
                         </div>
 
+
+                        {/* WITHDRAW ALL */}
+
                         <button
+
                             type="button"
+
                             className="withdraw-all"
-                            onClick={withdrawAll}
+
+                            onClick={
+                                withdrawAll
+                            }
+
+                            disabled={
+                                available < 100 ||
+                                submitting
+                            }
+
                         >
 
                             Withdraw All
 
                         </button>
 
+
+                        {/* SUBMIT */}
+
                         <button
+
                             className="withdraw-btn"
+
                             type="submit"
-                            disabled={submitting}
+
+                            disabled={
+
+                                submitting ||
+
+                                available < 100 ||
+
+                                !mpesa ||
+
+                                mpesa ===
+                                    "No M-Pesa Number"
+
+                            }
+
                         >
 
                             {submitting
+
                                 ? "Submitting..."
-                                : "Request Withdrawal"}
+
+                                : "Request Withdrawal"
+
+                            }
 
                         </button>
 
@@ -323,30 +647,42 @@ function statusBadge(status) {
 
                 </div>
 
+
+                {/* WITHDRAWAL HISTORY */}
+
                 <div className="withdraw-history-card">
 
                     <div className="card-title">
 
                         <FaHistory />
 
-                        <h2>Recent Withdrawals</h2>
+                        <h2>
+                            Recent Withdrawals
+                        </h2>
 
                     </div>
+
 
                     {withdrawals.length === 0 ? (
 
                         <div className="empty-history">
 
                             <img
+
                                 src="/images/empty-wallet.svg"
+
                                 alt=""
+
                             />
 
-                            <h3>No withdrawals yet</h3>
+                            <h3>
+                                No withdrawals yet
+                            </h3>
 
                             <p>
 
-                                Once you request your first withdrawal,
+                                Once you request
+                                your first withdrawal,
                                 it will appear here.
 
                             </p>
@@ -355,59 +691,109 @@ function statusBadge(status) {
 
                     ) : (
 
-                        <table className="withdraw-history-table">
+                        <table
+                            className="withdraw-history-table"
+                        >
 
                             <thead>
 
                                 <tr>
 
-                                    <th>Date</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Receipt</th>
+                                    <th>
+                                        Date
+                                    </th>
+
+                                    <th>
+                                        Amount
+                                    </th>
+
+                                    <th>
+                                        M-Pesa
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                    <th>
+                                        Receipt
+                                    </th>
 
                                 </tr>
 
                             </thead>
 
+
                             <tbody>
 
-                                {withdrawals.map((item) => (
+                                {withdrawals.map(
+                                    (item) => (
 
-                                    <tr key={item.id}>
+                                        <tr
+                                            key={
+                                                item.id
+                                            }
+                                        >
 
-                                        <td>
+                                            <td>
 
-                                            {new Date(
-                                                item.createdAt
-                                            ).toLocaleDateString()}
+                                                {new Date(
+                                                    item.createdAt
+                                                ).toLocaleDateString()}
 
-                                        </td>
+                                            </td>
 
-                                        <td>
 
-                                            KSh {Number(item.amount).toLocaleString()}
+                                            <td>
 
-                                        </td>
+                                                KSh{" "}
 
-                                        <td>
+                                                {Number(
+                                                    item.amount
+                                                ).toLocaleString()}
 
-                                            {statusBadge(item.status)}
+                                            </td>
 
-                                        </td>
-<td>
 
-    {item.status === "PAID"
-        ? item.transactionId || "-"
-        : item.status === "FAILED"
-        ? "-"
-        : "Awaiting M-Pesa"}
+                                            <td>
 
-</td>
+                                                {item.phoneNumber ||
+                                                    mpesa ||
+                                                    "-"}
 
-                                    </tr>
+                                            </td>
 
-                                ))}
+
+                                            <td>
+
+                                                {statusBadge(
+                                                    item.status
+                                                )}
+
+                                            </td>
+
+
+                                            <td>
+
+                                                {item.status ===
+                                                "PAID"
+
+                                                    ? item.transactionId ||
+                                                      "-"
+
+                                                    : item.status ===
+                                                      "FAILED"
+
+                                                    ? "-"
+
+                                                    : "Awaiting M-Pesa"}
+
+                                            </td>
+
+                                        </tr>
+
+                                    )
+                                )}
 
                             </tbody>
 
@@ -424,3 +810,4 @@ function statusBadge(status) {
     );
 
 }
+
