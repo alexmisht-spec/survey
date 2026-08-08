@@ -1,3 +1,4 @@
+
 import prisma from "../config/prisma.js";
 import { Prisma } from "@prisma/client";
 
@@ -64,9 +65,9 @@ export const requestWithdrawal = async (req, res) => {
 
                 wallet: true,
 
-                verification: true,
+                profile: true,
 
-                profile: true
+                verification: true
 
             }
 
@@ -123,30 +124,14 @@ export const requestWithdrawal = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | PROFILE CHECK
+        | M-PESA NUMBER
         |--------------------------------------------------------------------------
+        |
+        | Use the phone number supplied during registration.
+        |
         */
 
-        if (!user.profile) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message:
-                    "Please complete your profile before requesting a withdrawal."
-
-            });
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | MPESA NUMBER CHECK
-        |--------------------------------------------------------------------------
-        */
-
-        const mpesaNumber = user.profile.mpesaNumber?.trim();
+        const mpesaNumber = user.phone?.trim();
 
         if (!mpesaNumber) {
 
@@ -157,7 +142,7 @@ export const requestWithdrawal = async (req, res) => {
                 code: "MPESA_NUMBER_REQUIRED",
 
                 message:
-                    "No M-Pesa number found. Please add your M-Pesa number in Settings before requesting a withdrawal."
+                    "No phone number is associated with your account. Please update your phone number in Settings before requesting a withdrawal."
 
             });
 
@@ -188,10 +173,6 @@ export const requestWithdrawal = async (req, res) => {
         |--------------------------------------------------------------------------
         | PREVENT MULTIPLE PENDING WITHDRAWALS
         |--------------------------------------------------------------------------
-        |
-        | This prevents the same user from submitting several withdrawals
-        | before the admin processes the previous one.
-        |
         */
 
         const existingPending =
@@ -202,11 +183,17 @@ export const requestWithdrawal = async (req, res) => {
                     userId: user.id,
 
                     status: {
+
                         in: [
+
                             "PENDING",
+
                             "APPROVED",
+
                             "PROCESSING"
+
                         ]
+
                     }
 
                 }
@@ -236,7 +223,7 @@ export const requestWithdrawal = async (req, res) => {
 
             /*
             |--------------------------------------------------------------------------
-            | MOVE MONEY:
+            | MOVE MONEY
             |
             | availableBalance -> pendingBalance
             |--------------------------------------------------------------------------
@@ -294,14 +281,19 @@ export const requestWithdrawal = async (req, res) => {
                             ),
 
                         /*
-                        IMPORTANT:
-                        Store the M-Pesa number from PROFILE.
+                        |--------------------------------------------------------------------------
+                        | IMPORTANT
+                        |--------------------------------------------------------------------------
+                        | The registered phone number is used as
+                        | the M-Pesa withdrawal number.
+                        |--------------------------------------------------------------------------
                         */
 
                         phoneNumber:
                             mpesaNumber,
 
-                        status: "PENDING",
+                        status:
+                            "PENDING",
 
                         requestIp:
                             req.ip,
@@ -331,9 +323,11 @@ export const requestWithdrawal = async (req, res) => {
                             withdrawalAmount
                         ),
 
-                    type: "WITHDRAWAL",
+                    type:
+                        "WITHDRAWAL",
 
-                    status: "PENDING",
+                    status:
+                        "PENDING",
 
                     balanceBefore:
                         new Prisma.Decimal(
@@ -344,7 +338,7 @@ export const requestWithdrawal = async (req, res) => {
                         updatedWallet.availableBalance,
 
                     description:
-                        `Withdrawal request to M-Pesa ${mpesaNumber}`,
+                       ` Withdrawal request to M-Pesa ${mpesaNumber}`,
 
                     withdrawalId:
                         withdrawal.id,
@@ -363,7 +357,7 @@ export const requestWithdrawal = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | RESPONSE
+        | SUCCESS RESPONSE
         |--------------------------------------------------------------------------
         */
 
@@ -374,7 +368,8 @@ export const requestWithdrawal = async (req, res) => {
             message:
                 "Withdrawal request submitted successfully. Awaiting admin approval.",
 
-            phoneNumber: mpesaNumber
+            phoneNumber:
+                mpesaNumber
 
         });
 
@@ -416,13 +411,15 @@ export const getMyWithdrawals = async (req, res) => {
 
                 where: {
 
-                    userId: req.user.id
+                    userId:
+                        req.user.id
 
                 },
 
                 orderBy: {
 
-                    createdAt: "desc"
+                    createdAt:
+                        "desc"
 
                 }
 
@@ -457,3 +454,4 @@ export const getMyWithdrawals = async (req, res) => {
     }
 
 };
+
