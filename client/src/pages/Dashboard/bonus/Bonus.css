@@ -11,15 +11,15 @@
 }
 
 .bonus-header{
-    margin-bottom:24px;
-    max-width:860px;
+    margin-bottom:28px;
+    max-width:1100px;
     margin-left:auto;
     margin-right:auto;
 }
 
 .bonus-header h1{
     margin:0;
-    font-size:26px;
+    font-size:28px;
     font-weight:800;
     color:#0f172a;
 }
@@ -29,7 +29,7 @@
     color:#64748b;
     line-height:1.6;
     max-width:600px;
-    font-size:14px;
+    font-size:15px;
 }
 
 /* ==========================================
@@ -38,22 +38,22 @@
 
 .bonus-card{
     background:#fff;
-    border-radius:16px;
+    border-radius:18px;
     border:1px solid #e2e8f0;
-    padding:22px;
+    padding:36px;
     display:grid;
-    grid-template-columns:52px minmax(0, 1fr) 170px;
-    gap:18px;
-    align-items:start;
-    max-width:860px;
+    grid-template-columns:70px minmax(0, 1fr) 220px;
+    gap:32px;
+    align-items:stretch;              /* all columns same height = solid rectangle */
+    max-width:1100px;
     margin:0 auto;
-    box-shadow:0 4px 16px rgba(15,23,42,.04);
+    box-shadow:0 8px 24px rgba(15,23,42,.05);
 }
 
 .bonus-icon{
-    width:52px;
-    height:52px;
-    border-radius:14px;
+    width:70px;
+    height:70px;
+    border-radius:18px;
     background:#eff6ff;
     display:flex;
     justify-content:center;
@@ -61,26 +61,29 @@
 }
 
 .bonus-icon svg{
-    font-size:24px;
+    font-size:32px;
     color:#2563eb;
 }
 
 .bonus-content{
     min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
 }
 
 .bonus-content h2{
-    margin:0 0 6px;
+    margin:0;
     color:#0f172a;
-    font-size:19px;
+    font-size:22px;
     font-weight:700;
 }
 
 .bonus-description{
-    margin-bottom:14px;
+    margin:0;
     color:#64748b;
-    line-height:1.55;
-    font-size:13px;
+    line-height:1.6;
+    font-size:14px;
 }
 
 /* ==========================================
@@ -90,26 +93,26 @@
 .instruction-box{
     background:#f8fafc;
     border:1px solid #dbeafe;
-    border-left:3px solid #2563eb;
-    border-radius:12px;
-    padding:14px 16px;
-    margin-bottom:14px;
+    border-left:4px solid #2563eb;
+    border-radius:14px;
+    padding:22px 24px;
+    flex:1;                          /* fills available vertical space */
 }
 
 .instruction-box h4{
-    margin:0 0 10px;
+    margin:0 0 16px;
     color:#0f172a;
-    font-size:14px;
+    font-size:16px;
     font-weight:700;
     display:flex;
     align-items:center;
-    gap:6px;
+    gap:8px;
 }
 
 .instruction-box h4::before{
     content:"";
-    width:6px;
-    height:6px;
+    width:8px;
+    height:8px;
     background:#2563eb;
     border-radius:50%;
     display:inline-block;
@@ -121,17 +124,17 @@
     list-style:none;
     display:grid;
     grid-template-columns:repeat(2, 1fr);
-    gap:6px 16px;
+    gap:14px 28px;
     counter-reset:instruction;
 }
 
 .instruction-box li{
-    margin-bottom:0;
+    margin:0;
     color:#475569;
-    line-height:1.35;
+    line-height:1.5;
     position:relative;
-    padding-left:24px;
-    font-size:12px;
+    padding-left:32px;
+    font-size:14px;
 }
 
 .instruction-box li::before{
@@ -140,12 +143,12 @@
     position:absolute;
     left:0;
     top:1px;
-    width:18px;
-    height:18px;
+    width:22px;
+    height:22px;
     background:#dbeafe;
     color:#2563eb;
-    border-radius:5px;
-    font-size:10px;
+    border-radius:6px;
+    font-size:11px;
     font-weight:700;
     display:flex;
     align-items:center;
@@ -163,7 +166,7 @@
 
 .bonus-meta{
     display:flex;
-    gap:20px;
+    gap:32px;
 }
 
 .bonus-meta span{
@@ -172,11 +175,11 @@
     font-size:12px;
     color:#64748b;
     text-transform:uppercase;
-    gap:3px;
+    gap:4px;
 }
 
 .bonus-meta strong{
-    font-size:16px;
+    font-size:18px;
     color:#0f172a;
 }
 
@@ -185,29 +188,28 @@
 ========================================== */
 
 .bonus-actions{
-    width:170px;
+    width:220px;
     display:flex;
     flex-direction:column;
-    gap:10px;
-    position:sticky;
-    top:32px;
+    gap:14px;
+    justify-content:center;          /* buttons sit in the middle of the tall column */
 }
 
 .download-btn,
 .complete-task{
     width:100%;
-    height:40px;
+    height:48px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:8px;
+    gap:10px;
     text-decoration:none;
     font-weight:700;
     cursor:pointer;
-    transition:.2s;
-    font-size:12px;
+    transition:.25s;
+    font-size:13px;
 }
 
 .download-btn{
@@ -233,21 +235,21 @@
 ========================================== */
 
 .coming-title{
-    margin:40px auto 18px;
-    max-width:860px;
+    margin:48px auto 20px;
+    max-width:1100px;
 }
 
 .coming-title h2{
     margin:0;
     color:#0f172a;
-    font-size:20px;
+    font-size:22px;
 }
 
 .coming-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:16px;
-    max-width:860px;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:20px;
+    max-width:1100px;
     margin:0 auto;
 }
 
@@ -255,39 +257,39 @@
     position:relative;
     background:#fff;
     border:2px dashed #d4d4d8;
-    border-radius:14px;
-    padding:22px;
+    border-radius:16px;
+    padding:28px;
     overflow:hidden;
 }
 
 .coming-icon{
-    width:48px;
-    height:48px;
-    border-radius:12px;
+    width:56px;
+    height:56px;
+    border-radius:14px;
     background:#f3e8ff;
     display:flex;
     justify-content:center;
     align-items:center;
     color:#7c3aed;
-    font-size:22px;
-    margin-bottom:14px;
+    font-size:24px;
+    margin-bottom:18px;
 }
 
 .coming-card h3{
     margin:0;
     color:#0f172a;
-    font-size:16px;
+    font-size:17px;
 }
 
 .coming-card p{
-    margin:10px 0;
+    margin:12px 0;
     color:#64748b;
     line-height:1.6;
-    font-size:13px;
+    font-size:14px;
 }
 
 .coming-card strong{
-    font-size:18px;
+    font-size:20px;
     color:#0f172a;
 }
 
@@ -300,14 +302,14 @@
     flex-direction:column;
     justify-content:center;
     align-items:center;
-    gap:8px;
+    gap:10px;
     color:#7c3aed;
     font-weight:700;
     font-size:14px;
 }
 
 .coming-overlay svg{
-    font-size:28px;
+    font-size:32px;
 }
 
 /* ==========================================
@@ -323,13 +325,13 @@
 .bonus-card{
     display:flex;
     flex-direction:column;
-    max-width:640px;
+    max-width:720px;
 }
 
 .bonus-actions{
     width:100%;
     flex-direction:row;
-    position:static;
+    justify-content:flex-start;
 }
 
 .download-btn,
@@ -339,7 +341,7 @@
 
 .instruction-box ol{
     grid-template-columns:1fr;
-    gap:8px;
+    gap:12px;
 }
 
 }
@@ -356,24 +358,24 @@
 }
 
 .bonus-header h1{
-    font-size:22px;
+    font-size:24px;
 }
 
 .bonus-header p{
-    font-size:13px;
+    font-size:14px;
 }
 
 .bonus-card{
-    padding:18px;
+    padding:22px;
 }
 
 .bonus-icon{
-    width:48px;
-    height:48px;
+    width:60px;
+    height:60px;
 }
 
 .bonus-content h2{
-    font-size:18px;
+    font-size:20px;
 }
 
 .bonus-description{
@@ -381,20 +383,20 @@
 }
 
 .instruction-box{
-    padding:14px;
+    padding:18px;
 }
 
 .instruction-box h4{
-    font-size:14px;
+    font-size:15px;
 }
 
 .instruction-box li{
-    font-size:12px;
+    font-size:13px;
 }
 
 .bonus-meta{
     flex-direction:column;
-    gap:12px;
+    gap:14px;
 }
 
 .bonus-meta span{
@@ -428,24 +430,24 @@
 }
 
 .bonus-header h1{
-    font-size:20px;
+    font-size:22px;
 }
 
 .bonus-card{
-    padding:16px;
+    padding:18px;
 }
 
 .bonus-icon{
-    width:44px;
-    height:44px;
+    width:52px;
+    height:52px;
 }
 
 .bonus-icon svg{
-    font-size:20px;
+    font-size:24px;
 }
 
 .bonus-content h2{
-    font-size:17px;
+    font-size:18px;
 }
 
 .bonus-description{
@@ -453,43 +455,43 @@
 }
 
 .instruction-box{
-    padding:12px;
+    padding:14px;
 }
 
 .instruction-box h4{
-    font-size:13px;
+    font-size:14px;
 }
 
 .instruction-box li{
-    font-size:11px;
+    font-size:12px;
 }
 
 .download-btn,
 .complete-task{
-    height:44px;
+    height:46px;
     font-size:13px;
 }
 
 .coming-card{
-    padding:18px;
+    padding:20px;
 }
 
 .coming-icon{
-    width:44px;
-    height:44px;
-    font-size:20px;
+    width:48px;
+    height:48px;
+    font-size:22px;
 }
 
 .coming-card h3{
-    font-size:15px;
+    font-size:16px;
 }
 
 .coming-card p{
-    font-size:12px;
+    font-size:13px;
 }
 
 .coming-card strong{
-    font-size:17px;
+    font-size:18px;
 }
 
 }
