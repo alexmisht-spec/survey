@@ -5,16 +5,13 @@
 .bonus-page{
     width:100%;
     min-height:100vh;
-    padding:32px;
+    padding:28px;
     background:#f8fafc;
     box-sizing:border-box;
 }
 
 .bonus-header{
-    margin-bottom:28px;
-    max-width:1100px;
-    margin-left:auto;
-    margin-right:auto;
+    margin-bottom:24px;
 }
 
 .bonus-header h1{
@@ -38,49 +35,46 @@
 
 .bonus-card{
     background:#fff;
-    border-radius:18px;
+    border-radius:16px;
     border:1px solid #e2e8f0;
-    padding:36px;
-    display:grid;
-    grid-template-columns:70px minmax(0, 1fr) 220px;
-    gap:32px;
-    align-items:stretch;              /* all columns same height = solid rectangle */
-    max-width:1100px;
-    margin:0 auto;
-    box-shadow:0 8px 24px rgba(15,23,42,.05);
+    padding:28px;
+    display:flex;
+    gap:28px;
+    align-items:flex-start;
+    width:100%;
+    box-shadow:0 4px 20px rgba(15,23,42,.05);
 }
 
 .bonus-icon{
-    width:70px;
-    height:70px;
-    border-radius:18px;
+    width:64px;
+    height:64px;
+    border-radius:16px;
     background:#eff6ff;
     display:flex;
     justify-content:center;
     align-items:center;
+    flex-shrink:0;
 }
 
 .bonus-icon svg{
-    font-size:32px;
+    font-size:28px;
     color:#2563eb;
 }
 
 .bonus-content{
+    flex:1;
     min-width:0;
-    display:flex;
-    flex-direction:column;
-    gap:20px;
 }
 
 .bonus-content h2{
-    margin:0;
+    margin:0 0 10px;
     color:#0f172a;
     font-size:22px;
     font-weight:700;
 }
 
 .bonus-description{
-    margin:0;
+    margin:0 0 20px;
     color:#64748b;
     line-height:1.6;
     font-size:14px;
@@ -95,12 +89,12 @@
     border:1px solid #dbeafe;
     border-left:4px solid #2563eb;
     border-radius:14px;
-    padding:22px 24px;
-    flex:1;                          /* fills available vertical space */
+    padding:20px 22px;
+    margin-bottom:20px;
 }
 
 .instruction-box h4{
-    margin:0 0 16px;
+    margin:0 0 14px;
     color:#0f172a;
     font-size:16px;
     font-weight:700;
@@ -122,9 +116,9 @@
     margin:0;
     padding:0;
     list-style:none;
-    display:grid;
-    grid-template-columns:repeat(2, 1fr);
-    gap:14px 28px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
     counter-reset:instruction;
 }
 
@@ -133,7 +127,7 @@
     color:#475569;
     line-height:1.5;
     position:relative;
-    padding-left:32px;
+    padding-left:30px;
     font-size:14px;
 }
 
@@ -188,27 +182,27 @@
 ========================================== */
 
 .bonus-actions{
-    width:220px;
+    width:200px;
     display:flex;
     flex-direction:column;
-    gap:14px;
-    justify-content:center;          /* buttons sit in the middle of the tall column */
+    gap:12px;
+    flex-shrink:0;
 }
 
 .download-btn,
 .complete-task{
     width:100%;
-    height:48px;
+    height:46px;
     border:none;
-    border-radius:12px;
+    border-radius:10px;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:10px;
+    gap:8px;
     text-decoration:none;
     font-weight:700;
     cursor:pointer;
-    transition:.25s;
+    transition:.2s;
     font-size:13px;
 }
 
@@ -235,8 +229,7 @@
 ========================================== */
 
 .coming-title{
-    margin:48px auto 20px;
-    max-width:1100px;
+    margin:40px 0 18px;
 }
 
 .coming-title h2{
@@ -247,10 +240,8 @@
 
 .coming-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:20px;
-    max-width:1100px;
-    margin:0 auto;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:18px;
 }
 
 .coming-card{
@@ -258,13 +249,13 @@
     background:#fff;
     border:2px dashed #d4d4d8;
     border-radius:16px;
-    padding:28px;
+    padding:24px;
     overflow:hidden;
 }
 
 .coming-icon{
-    width:56px;
-    height:56px;
+    width:52px;
+    height:52px;
     border-radius:14px;
     background:#f3e8ff;
     display:flex;
@@ -272,7 +263,7 @@
     align-items:center;
     color:#7c3aed;
     font-size:24px;
-    margin-bottom:18px;
+    margin-bottom:16px;
 }
 
 .coming-card h3{
@@ -282,7 +273,7 @@
 }
 
 .coming-card p{
-    margin:12px 0;
+    margin:10px 0;
     color:#64748b;
     line-height:1.6;
     font-size:14px;
@@ -323,25 +314,17 @@
 }
 
 .bonus-card{
-    display:flex;
     flex-direction:column;
-    max-width:720px;
 }
 
 .bonus-actions{
     width:100%;
     flex-direction:row;
-    justify-content:flex-start;
 }
 
 .download-btn,
 .complete-task{
     flex:1;
-}
-
-.instruction-box ol{
-    grid-template-columns:1fr;
-    gap:12px;
 }
 
 }
@@ -366,12 +349,12 @@
 }
 
 .bonus-card{
-    padding:22px;
+    padding:20px;
 }
 
 .bonus-icon{
-    width:60px;
-    height:60px;
+    width:56px;
+    height:56px;
 }
 
 .bonus-content h2{
@@ -383,7 +366,7 @@
 }
 
 .instruction-box{
-    padding:18px;
+    padding:16px;
 }
 
 .instruction-box h4{
@@ -434,16 +417,16 @@
 }
 
 .bonus-card{
-    padding:18px;
+    padding:16px;
 }
 
 .bonus-icon{
-    width:52px;
-    height:52px;
+    width:48px;
+    height:48px;
 }
 
 .bonus-icon svg{
-    font-size:24px;
+    font-size:22px;
 }
 
 .bonus-content h2{
@@ -468,7 +451,7 @@
 
 .download-btn,
 .complete-task{
-    height:46px;
+    height:44px;
     font-size:13px;
 }
 
