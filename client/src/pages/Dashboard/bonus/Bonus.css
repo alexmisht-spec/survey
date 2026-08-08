@@ -4,33 +4,33 @@
 
 .bonus-page {
   width: 100%;
-  display: block;
-  padding: 24px;
+  min-height: 100vh;
+  padding: 28px;
   background: #f8fafc;
   box-sizing: border-box;
 }
 
 .bonus-header {
-  margin-bottom: 20px;
-  width: 100%;
+  margin-bottom: 24px;
 }
 
 .bonus-header h1 {
   margin: 0;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
   color: #0f172a;
 }
 
 .bonus-header p {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   color: #64748b;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 600px;
 }
 
 /* ==========================================
-   MAIN CARD — Forces full width, no shrink
+   MAIN CARD — Short, clean, full width
 ========================================== */
 
 .bonus-card {
@@ -39,21 +39,16 @@
   border: 1px solid #e2e8f0;
   padding: 24px;
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 24px;
-  align-items: stretch;
+  gap: 20px;
+  align-items: center;
   width: 100%;
-  max-width: none;          /* kill any max-width */
-  min-width: 0;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 6px 18px rgba(15, 23, 42, 0.04);
   box-sizing: border-box;
 }
 
-/* Left: Icon */
 .bonus-icon {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 14px;
   background: #eff6ff;
   display: flex;
@@ -63,17 +58,16 @@
 }
 
 .bonus-icon svg {
-  font-size: 24px;
+  font-size: 26px;
   color: #2563eb;
 }
 
-/* Center: Content — grows to eat ALL space */
 .bonus-content {
-  flex: 1 1 auto;
+  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .bonus-content h2 {
@@ -90,72 +84,6 @@
   line-height: 1.5;
 }
 
-/* ==========================================
-   INSTRUCTIONS — 3 wide columns, compact
-========================================== */
-
-.instruction-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-left: 3px solid #2563eb;
-  border-radius: 12px;
-  padding: 14px 18px;
-}
-
-.instruction-box h4 {
-  margin: 0 0 10px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #0f172a;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-.instruction-box ol {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px 24px;
-  counter-reset: step;
-}
-
-.instruction-box li {
-  position: relative;
-  padding-left: 22px;
-  color: #475569;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.instruction-box li::before {
-  counter-increment: step;
-  content: counter(step);
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 16px;
-  height: 16px;
-  background: #dbeafe;
-  color: #2563eb;
-  border-radius: 4px;
-  font-size: 9px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.instruction-box strong {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-/* ==========================================
-   META
-========================================== */
-
 .bonus-meta {
   display: flex;
   gap: 28px;
@@ -164,7 +92,7 @@
 .bonus-meta span {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   font-size: 11px;
   color: #64748b;
   text-transform: uppercase;
@@ -173,29 +101,169 @@
 }
 
 .bonus-meta strong {
-  font-size: 17px;
+  font-size: 18px;
   color: #0f172a;
   font-weight: 700;
   text-transform: none;
 }
 
+.read-instructions-btn {
+  margin-top: 4px;
+  width: fit-content;
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.read-instructions-btn:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
 /* ==========================================
-   ACTIONS — Fixed width, centered vertically
+   MODAL OVERLAY
 ========================================== */
 
-.bonus-actions {
-  width: 180px;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+  animation: slideUp 0.25s ease;
+  box-sizing: border-box;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modal-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+.modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* ==========================================
+   MODAL INSTRUCTIONS
+========================================== */
+
+.modal-instructions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  counter-reset: step;
+}
+
+.modal-instructions li {
+  position: relative;
+  padding-left: 36px;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.modal-instructions li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 24px;
+  height: 24px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
+.modal-instructions strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* ==========================================
+   MODAL ACTIONS
+========================================== */
+
+.modal-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+}
+
 .download-btn,
 .complete-task {
-  width: 100%;
-  height: 42px;
+  flex: 1;
+  height: 46px;
   border: none;
   border-radius: 10px;
   display: flex;
@@ -204,10 +272,9 @@
   gap: 8px;
   text-decoration: none;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   transition: background 0.2s;
-  white-space: nowrap;
 }
 
 .download-btn {
@@ -233,8 +300,7 @@
 ========================================== */
 
 .coming-title {
-  margin: 36px 0 16px;
-  width: 100%;
+  margin: 40px 0 18px;
 }
 
 .coming-title h2 {
@@ -248,7 +314,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
-  width: 100%;
 }
 
 .coming-card {
@@ -305,7 +370,7 @@
   gap: 8px;
   color: #7c3aed;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .coming-overlay svg {
@@ -316,31 +381,13 @@
    TABLET
 ========================================== */
 
-@media (max-width: 1100px) {
-  .instruction-box ol {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 992px) {
   .bonus-page {
     padding: 20px;
   }
 
   .bonus-card {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .bonus-actions {
-    width: 100%;
-    flex-direction: row;
-    justify-content: flex-start;
-  }
-
-  .download-btn,
-  .complete-task {
-    flex: 1;
+    padding: 20px;
   }
 }
 
@@ -355,31 +402,84 @@
   }
 
   .bonus-header h1 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .bonus-card {
-    padding: 20px;
+    padding: 18px;
+    gap: 16px;
   }
 
-  .instruction-box ol {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .bonus-icon {
+    width: 48px;
+    height: 48px;
   }
 
-  .bonus-meta {
+  .bonus-icon svg {
+    font-size: 22px;
+  }
+
+  .bonus-content h2 {
+    font-size: 18px;
+  }
+
+  .bonus-description {
+    font-size: 13px;
+  }
+
+  .bonus-meta strong {
+    font-size: 16px;
+  }
+
+  .read-instructions-btn {
+    height: 36px;
+    font-size: 12px;
+    padding: 0 14px;
+  }
+
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 20px 20px 0 0;
+    padding: 22px;
+    animation: slideUpMobile 0.25s ease;
+  }
+
+  @keyframes slideUpMobile {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .modal-header h3 {
+    font-size: 18px;
+  }
+
+  .modal-instructions li {
+    font-size: 13px;
+    padding-left: 32px;
+  }
+
+  .modal-instructions li::before {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+
+  .modal-actions {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
-  .bonus-meta span {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .bonus-actions {
-    flex-direction: column;
+  .download-btn,
+  .complete-task {
+    width: 100%;
+    height: 48px;
+    font-size: 14px;
   }
 
   .coming-grid {
@@ -397,10 +497,49 @@
   }
 
   .bonus-header h1 {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .bonus-card {
     padding: 16px;
+  }
+
+  .bonus-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .bonus-content h2 {
+    font-size: 17px;
+  }
+
+  .bonus-description {
+    font-size: 12px;
+  }
+
+  .bonus-meta {
+    gap: 20px;
+  }
+
+  .coming-card {
+    padding: 18px;
+  }
+
+  .coming-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .coming-card h3 {
+    font-size: 15px;
+  }
+
+  .coming-card p {
+    font-size: 13px;
+  }
+
+  .coming-card strong {
+    font-size: 17px;
   }
 }
