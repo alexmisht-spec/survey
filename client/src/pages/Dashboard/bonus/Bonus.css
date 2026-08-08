@@ -12,6 +12,9 @@
 
 .bonus-header{
     margin-bottom:30px;
+    max-width:1100px;
+    margin-left:auto;
+    margin-right:auto;
 }
 
 .bonus-header h1{
@@ -37,9 +40,12 @@
     border-radius:18px;
     border:1px solid #e2e8f0;
     padding:30px;
-    display:flex;
+    display:grid;
+    grid-template-columns:70px minmax(0, 1fr) 220px;
     gap:25px;
-    align-items:flex-start;
+    align-items:start;
+    max-width:1100px;
+    margin:0 auto;
     box-shadow:0 8px 24px rgba(15,23,42,.05);
 }
 
@@ -51,7 +57,6 @@
     display:flex;
     justify-content:center;
     align-items:center;
-    flex-shrink:0;
 }
 
 .bonus-icon svg{
@@ -60,7 +65,7 @@
 }
 
 .bonus-content{
-    flex:1;
+    min-width:0;
 }
 
 .bonus-content h2{
@@ -83,26 +88,65 @@
 .instruction-box{
     background:#f8fafc;
     border:1px solid #dbeafe;
+    border-left:4px solid #2563eb;
     border-radius:14px;
-    padding:20px;
+    padding:24px;
     margin-bottom:24px;
 }
 
 .instruction-box h4{
-    margin:0 0 15px;
+    margin:0 0 18px;
     color:#0f172a;
     font-size:18px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.instruction-box h4::before{
+    content:"";
+    width:8px;
+    height:8px;
+    background:#2563eb;
+    border-radius:50%;
+    display:inline-block;
 }
 
 .instruction-box ol{
     margin:0;
-    padding-left:20px;
+    padding:0;
+    list-style:none;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:14px 32px;
+    counter-reset:instruction;
 }
 
 .instruction-box li{
-    margin-bottom:12px;
+    margin-bottom:0;
     color:#475569;
-    line-height:1.8;
+    line-height:1.6;
+    position:relative;
+    padding-left:34px;
+}
+
+.instruction-box li::before{
+    counter-increment:instruction;
+    content:counter(instruction);
+    position:absolute;
+    left:0;
+    top:2px;
+    width:24px;
+    height:24px;
+    background:#dbeafe;
+    color:#2563eb;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
 }
 
 .instruction-box strong{
@@ -141,7 +185,8 @@
     display:flex;
     flex-direction:column;
     gap:15px;
-    flex-shrink:0;
+    position:sticky;
+    top:32px;
 }
 
 .download-btn,
@@ -183,7 +228,8 @@
 ========================================== */
 
 .coming-title{
-    margin:45px 0 20px;
+    margin:45px auto 20px;
+    max-width:1100px;
 }
 
 .coming-title h2{
@@ -195,6 +241,8 @@
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
     gap:20px;
+    max-width:1100px;
+    margin:0 auto;
 }
 
 .coming-card{
@@ -264,17 +312,25 @@
 }
 
 .bonus-card{
+    display:flex;
     flex-direction:column;
+    max-width:700px;
 }
 
 .bonus-actions{
     width:100%;
     flex-direction:row;
+    position:static;
 }
 
 .download-btn,
 .complete-task{
     flex:1;
+}
+
+.instruction-box ol{
+    grid-template-columns:1fr;
+    gap:12px;
 }
 
 }

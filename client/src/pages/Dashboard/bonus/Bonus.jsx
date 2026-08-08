@@ -107,7 +107,7 @@ export default function Bonus() {
     <div className="bonus-actions">
 
         <a
-            href="https://everytry.com"
+            href="https://play.google.com/store/apps/details?id=com.evertry.app&pcampaignid=web_share"
             target="_blank"
             rel="noopener noreferrer"
             className="download-btn"
