@@ -12,6 +12,10 @@ export default function DashboardSurveys() {
     const [completed, setCompleted] = useState([]);
     const [comingSoon, setComingSoon] = useState([]);
 
+    const [verified, setVerified] = useState(false);
+    const [verificationStatus, setVerificationStatus] =
+        useState("NOT_SUBMITTED");
+
     /*
     |--------------------------------------------------------------------------
     | LOAD SURVEYS
@@ -36,6 +40,21 @@ export default function DashboardSurveys() {
 
             setComingSoon(
                 res.data.comingSoon || []
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | VERIFICATION STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            setVerified(
+                res.data.verified === true
+            );
+
+            setVerificationStatus(
+                res.data.verificationStatus ||
+                "NOT_SUBMITTED"
             );
 
         } catch (err) {
@@ -118,6 +137,52 @@ export default function DashboardSurveys() {
 
 
             {/* -----------------------------------------------------------------
+                VERIFICATION MESSAGE
+            ----------------------------------------------------------------- */}
+
+            {!verified && (
+
+                <div className="survey-verification-notice">
+
+                    <h3>
+                        Verification Required
+                    </h3>
+
+                    {verificationStatus === "NOT_SUBMITTED" && (
+
+                        <p>
+                            Please upload your verification documents
+                            before you can access surveys.
+                        </p>
+
+                    )}
+
+                    {verificationStatus === "PENDING" && (
+
+                        <p>
+                            Your verification documents are currently
+                            being reviewed. Surveys will become available
+                            once your verification is approved.
+                        </p>
+
+                    )}
+
+                    {verificationStatus === "REJECTED" && (
+
+                        <p>
+                            Your verification was rejected.
+                            Please review the reason and resubmit
+                            your documents.
+                        </p>
+
+                    )}
+
+                </div>
+
+            )}
+
+
+            {/* -----------------------------------------------------------------
                 AVAILABLE SURVEYS
             ----------------------------------------------------------------- */}
 
@@ -127,7 +192,7 @@ export default function DashboardSurveys() {
                     Available Surveys
                 </h2>
 
-                {available.length > 0 ? (
+                {verified && available.length > 0 ? (
 
                     <div className="survey-grid">
 
@@ -139,9 +204,11 @@ export default function DashboardSurveys() {
 
                                 survey={item.survey}
 
-                                verified={true}
+                                verified={verified}
 
-                                verificationStatus="APPROVED"
+                                verificationStatus={
+                                    verificationStatus
+                                }
 
                                 completed={false}
 
@@ -159,8 +226,13 @@ export default function DashboardSurveys() {
 
                     <div className="empty-box">
 
-                        No active surveys available
-                        at the moment.
+                        {!verified
+
+                            ? "Complete account verification to access available surveys."
+
+                            : "No active surveys available at the moment."
+
+                        }
 
                     </div>
 
@@ -179,7 +251,7 @@ export default function DashboardSurveys() {
                     Completed Surveys
                 </h2>
 
-                {completed.length > 0 ? (
+                {verified && completed.length > 0 ? (
 
                     <div className="survey-grid">
 
@@ -193,9 +265,11 @@ export default function DashboardSurveys() {
 
                                 completed={true}
 
-                                verified={true}
+                                verified={verified}
 
-                                verificationStatus="APPROVED"
+                                verificationStatus={
+                                    verificationStatus
+                                }
 
                                 comingSoon={false}
 
@@ -209,8 +283,13 @@ export default function DashboardSurveys() {
 
                     <div className="empty-box">
 
-                        You haven't completed any
-                        surveys yet.
+                        {!verified
+
+                            ? "Completed surveys will appear here after verification."
+
+                            : "You haven't completed any surveys yet."
+
+                        }
 
                     </div>
 
@@ -245,9 +324,11 @@ export default function DashboardSurveys() {
 
                                 comingSoon={true}
 
-                                verified={false}
+                                verified={verified}
 
-                                verificationStatus="PENDING"
+                                verificationStatus={
+                                    verificationStatus
+                                }
 
                             />
 
@@ -272,4 +353,5 @@ export default function DashboardSurveys() {
     );
 
 }
+
 
