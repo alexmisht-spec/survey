@@ -772,6 +772,12 @@ export const getSurvey = async (req, res) => {
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| SUBMIT SURVEY
+|--------------------------------------------------------------------------
+*/
+
 export const submitSurvey = async (req, res) => {
 
     try {
@@ -848,95 +854,10 @@ export const submitSurvey = async (req, res) => {
 
         }
 
-/*
-|--------------------------------------------------------------------------
-| CHECK USER ASSIGNMENT
-|--------------------------------------------------------------------------
-|
-| An assigned user is allowed to complete a COMING_SOON survey.
-|
-| The survey's global status still controls users who were not
-| explicitly assigned.
-|
-*/
-
-const assignment =
-    await prisma.surveyAssignment.findFirst({
-
-        where: {
-
-            surveyId,
-
-            userId,
-
-            completed: false
-
-        }
-
-    });
-
-
-/*
-|--------------------------------------------------------------------------
-| BLOCK LOCKED / CLOSED SURVEYS
-|--------------------------------------------------------------------------
-|
-| These statuses always override an assignment.
-|
-*/
-
-if (
-    survey.status === "LOCKED" ||
-    survey.status === "CLOSED"
-) {
-
-    return res.status(400).json({
-
-        success: false,
-
-        message:
-            "This survey is currently unavailable."
-
-    });
-
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| ACTIVE / ASSIGNED CHECK
-|--------------------------------------------------------------------------
-|
-| ACTIVE survey:
-|     Anyone who is otherwise eligible can continue.
-|
-| COMING_SOON survey:
-|     Only an explicitly assigned user can continue.
-|
-*/
-
-if (
-    survey.status !== "ACTIVE" &&
-    !assignment
-) {
-
-    return res.status(400).json({
-
-        success: false,
-
-        message:
-            "This survey is no longer active."
-
-    });
-
-}
-
-
-
 
         /*
         |--------------------------------------------------------------------------
-        | PREVENT DUPLICATE SUBMISSION
+        | CHECK IF ALREADY COMPLETED
         |--------------------------------------------------------------------------
         */
 
@@ -947,7 +868,9 @@ if (
 
                     surveyId,
 
-                    userId
+                    userId,
+
+                    completed: true
 
                 }
 
@@ -961,7 +884,7 @@ if (
                 success: false,
 
                 message:
-                    "Survey already submitted."
+                    "You have already completed this survey."
 
             });
 
@@ -970,123 +893,130 @@ if (
 
         /*
         |--------------------------------------------------------------------------
-        | CHECK ASSIGNMENT
-        |--------------------------------------------------------------------------
-        */
-
-        /*
-|--------------------------------------------------------------------------
-| CHECK ASSIGNMENT
-|--------------------------------------------------------------------------
-*/
-
-const assignment =
-    await prisma.surveyAssignment.findFirst({
-
-        where: {
-
-            surveyId,
-
-            userId,
-
-            completed: false
-
-        },
-
-        include: {
-
-            survey: true
-
-        }
-
-    });
-
-
-/*
-|--------------------------------------------------------------------------
-| EXPLICITLY ASSIGNED SURVEY
-|--------------------------------------------------------------------------
-|
-| An explicitly assigned survey may be COMING_SOON.
-|
-| LOCKED and CLOSED are still blocked.
-|
-*/
-
-if (assignment) {
-
-    if (
-        survey.status === "LOCKED" ||
-        survey.status === "CLOSED"
-    ) {
-
-        return res.status(400).json({
-
-            success: false,
-
-            message:
-                "This survey is currently unavailable."
-
-        });
-
-    }
-
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| NON-ASSIGNED SURVEY MUST BE ACTIVE
-|--------------------------------------------------------------------------
-*/
-
-else if (
-    survey.status !== "ACTIVE"
-) {
-
-    return res.status(400).json({
-
-        success: false,
-
-        message:
-            "This survey is no longer active."
-
-    });
-
-}
-
-        /*
-        |--------------------------------------------------------------------------
-        | DETERMINE WHETHER USER IS ALLOWED
+        | CHECK EXPLICIT ASSIGNMENT
         |--------------------------------------------------------------------------
         |
-        | Either:
+        | IMPORTANT:
         |
-        | 1. Survey is assigned
+        | This is checked BEFORE checking whether the survey is ACTIVE.
         |
-        | OR
+        | Therefore:
         |
-        | 2. Survey is the user's current automatic survey.
+        | COMING_SOON + assigned user = ALLOWED
         |
         */
 
-        let allowed = false;
+        const assignment =
+            await prisma.surveyAssignment.findFirst({
+
+                where: {
+
+                    surveyId,
+
+                    userId,
+
+                    completed: false
+
+                }
+
+            });
 
 
-        if (assignment) {
+        const isAssigned =
+            Boolean(assignment);
 
-            allowed = true;
+
+        /*
+        |--------------------------------------------------------------------------
+        | BLOCK LOCKED / CLOSED
+        |--------------------------------------------------------------------------
+        |
+        | These statuses always override an assignment.
+        |
+        */
+
+        if (
+            survey.status === "LOCKED" ||
+            survey.status === "CLOSED"
+        ) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message:
+                    "This survey is currently unavailable."
+
+            });
 
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | ASSIGNED USER
+        |--------------------------------------------------------------------------
+        |
+        | An explicitly assigned user can submit:
+        |
+        | ACTIVE
+        | COMING_SOON
+        |
+        */
+
+        if (isAssigned) {
+
+            console.log(
+                `Survey ${surveyId} is assigned to user ${userId}.`
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NON-ASSIGNED USER
+        |--------------------------------------------------------------------------
+        |
+        | Users who were NOT explicitly assigned can only submit
+        | ACTIVE surveys.
+        |
+        */
 
         else {
 
-            /*
-            |--------------------------------------------------------------------------
-            | FIND FIRST UNCOMPLETED ACTIVE SURVEY
-            |--------------------------------------------------------------------------
-            */
+            if (
+                survey.status !== "ACTIVE"
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "This survey is no longer active."
+
+                });
+
+            }
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DETERMINE AUTOMATIC SURVEY ACCESS
+        |--------------------------------------------------------------------------
+        |
+        | If the user is assigned, we don't need the automatic
+        | survey mechanism.
+        |
+        | If the user is NOT assigned, only the first uncompleted
+        | ACTIVE survey can be submitted.
+        |
+        */
+
+        if (!isAssigned) {
 
             const activeSurveys =
                 await prisma.survey.findMany({
@@ -1112,6 +1042,12 @@ else if (
                 });
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | GET COMPLETED SURVEYS
+            |--------------------------------------------------------------------------
+            */
+
             const completedSurveys =
                 await prisma.surveyResponse.findMany({
 
@@ -1136,11 +1072,18 @@ else if (
                 new Set(
 
                     completedSurveys.map(
-                        item => item.surveyId
+                        item =>
+                            item.surveyId
                     )
 
                 );
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | FIRST AVAILABLE AUTOMATIC SURVEY
+            |--------------------------------------------------------------------------
+            */
 
             const firstAvailable =
                 activeSurveys.find(
@@ -1153,34 +1096,27 @@ else if (
                 );
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | ENSURE THIS IS THE AUTOMATIC SURVEY
+            |--------------------------------------------------------------------------
+            */
+
             if (
-                firstAvailable &&
-                firstAvailable.id === surveyId
+                !firstAvailable ||
+                firstAvailable.id !== surveyId
             ) {
 
-                allowed = true;
+                return res.status(403).json({
+
+                    success: false,
+
+                    message:
+                        "This survey is not currently available."
+
+                });
 
             }
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | BLOCK COMING SOON SURVEYS
-        |--------------------------------------------------------------------------
-        */
-
-        if (!allowed) {
-
-            return res.status(403).json({
-
-                success: false,
-
-                message:
-                    "This survey is not currently available."
-
-            });
 
         }
 
@@ -1192,11 +1128,13 @@ else if (
         */
 
         await prisma.$transaction(
+
             async (tx) => {
+
 
                 /*
                 |--------------------------------------------------------------------------
-                | CREATE RESPONSE
+                | CREATE SURVEY RESPONSE
                 |--------------------------------------------------------------------------
                 */
 
@@ -1254,8 +1192,12 @@ else if (
 
                 /*
                 |--------------------------------------------------------------------------
-                | COMPLETE ASSIGNMENT IF ONE EXISTS
+                | COMPLETE ASSIGNMENT
                 |--------------------------------------------------------------------------
+                |
+                | Only update an assignment if this survey was
+                | explicitly assigned to the user.
+                |
                 */
 
                 if (assignment) {
@@ -1292,7 +1234,7 @@ else if (
 
                 /*
                 |--------------------------------------------------------------------------
-                | WALLET
+                | GET WALLET
                 |--------------------------------------------------------------------------
                 */
 
@@ -1319,7 +1261,7 @@ else if (
 
                 /*
                 |--------------------------------------------------------------------------
-                | REWARD
+                | CALCULATE REWARD
                 |--------------------------------------------------------------------------
                 */
 
@@ -1331,7 +1273,7 @@ else if (
 
                 /*
                 |--------------------------------------------------------------------------
-                | CREDIT USER
+                | CREDIT WALLET
                 |--------------------------------------------------------------------------
                 */
 
@@ -1367,7 +1309,7 @@ else if (
 
                 /*
                 |--------------------------------------------------------------------------
-                | TRANSACTION
+                | CREATE WALLET TRANSACTION
                 |--------------------------------------------------------------------------
                 */
 
@@ -1416,12 +1358,14 @@ else if (
 
     }
 
+
     catch (error) {
 
         console.error(
             "SUBMIT SURVEY ERROR:",
             error
         );
+
 
         return res.status(500).json({
 
