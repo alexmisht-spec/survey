@@ -10,7 +10,7 @@ import "./AdminSurveys.css";
 
 import {
     getSurveys,
-    deleteSurvey,
+    deleteSurvey ,
     activateSurvey,
     setSurveyStatus,
     getVerifiedUsers,
