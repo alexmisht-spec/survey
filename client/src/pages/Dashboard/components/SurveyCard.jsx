@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import "./SurveyCard.css";
 
@@ -8,6 +9,12 @@ export default function SurveyCard({
 }) {
 
     const navigate = useNavigate();
+
+    /*
+    |--------------------------------------------------------------------------
+    | EMPTY SURVEY
+    |--------------------------------------------------------------------------
+    */
 
     if (!survey) {
 
@@ -27,17 +34,43 @@ export default function SurveyCard({
 
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | COMING SOON
+    |--------------------------------------------------------------------------
+    |
+    | A survey is Coming Soon when:
+    |
+    | - Its status is not ACTIVE
+    | - OR preview is explicitly true
+    |
+    */
+
     const isComingSoon =
-        survey.status !== "ACTIVE" || survey.preview === true;
+        survey.status !== "ACTIVE" ||
+        survey.preview === true;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACTION BUTTON
+    |--------------------------------------------------------------------------
+    */
 
     function renderAction() {
 
-        // Coming Soon survey
+        /*
+        |----------------------------------------------------------------------
+        | COMING SOON
+        |----------------------------------------------------------------------
+        */
+
         if (isComingSoon) {
 
             return (
 
                 <button
+                    type="button"
                     className="coming-soon-btn"
                     disabled
                 >
@@ -48,12 +81,19 @@ export default function SurveyCard({
 
         }
 
-        // User hasn't uploaded KYC
+
+        /*
+        |----------------------------------------------------------------------
+        | USER HAS NOT SUBMITTED VERIFICATION
+        |----------------------------------------------------------------------
+        */
+
         if (verificationStatus === "NOT_SUBMITTED") {
 
             return (
 
                 <button
+                    type="button"
                     className="locked-btn"
                     disabled
                 >
@@ -64,12 +104,19 @@ export default function SurveyCard({
 
         }
 
-        // Waiting approval
+
+        /*
+        |----------------------------------------------------------------------
+        | VERIFICATION PENDING
+        |----------------------------------------------------------------------
+        */
+
         if (verificationStatus === "PENDING") {
 
             return (
 
                 <button
+                    type="button"
                     className="locked-btn pending"
                     disabled
                 >
@@ -80,12 +127,19 @@ export default function SurveyCard({
 
         }
 
-        // Rejected
+
+        /*
+        |----------------------------------------------------------------------
+        | VERIFICATION REJECTED
+        |----------------------------------------------------------------------
+        */
+
         if (verificationStatus === "REJECTED") {
 
             return (
 
                 <button
+                    type="button"
                     className="locked-btn rejected"
                     disabled
                 >
@@ -96,12 +150,19 @@ export default function SurveyCard({
 
         }
 
-        // Extra safety
+
+        /*
+        |----------------------------------------------------------------------
+        | EXTRA SECURITY CHECK
+        |----------------------------------------------------------------------
+        */
+
         if (!verified) {
 
             return (
 
                 <button
+                    type="button"
                     className="locked-btn"
                     disabled
                 >
@@ -112,11 +173,21 @@ export default function SurveyCard({
 
         }
 
+
+        /*
+        |----------------------------------------------------------------------
+        | ACTIVE SURVEY
+        |----------------------------------------------------------------------
+        */
+
         return (
 
             <button
+                type="button"
                 className="start-btn"
-                onClick={() => navigate(`/surveys/${survey.id}`)}
+                onClick={() =>
+                    navigate(`/surveys/${survey.id}`)
+                }
             >
                 Start Survey
             </button>
@@ -125,25 +196,34 @@ export default function SurveyCard({
 
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | CARD
+    |--------------------------------------------------------------------------
+    */
+
     return (
 
-        <div className={`survey-card ${isComingSoon ? "coming-soon" : ""}`}>
+        <div
+            className={`survey-card ${
+                isComingSoon ? "coming-soon" : ""
+            }`}
+        >
 
-            {isComingSoon && (
-
-                <div className="coming-overlay">
-
-                    <span>COMING SOON</span>
-
-                </div>
-
-            )}
+            {/* 
+            |--------------------------------------------------------------------------
+            | HEADER
+            |--------------------------------------------------------------------------
+            */}
 
             <div className="survey-header">
 
                 <span
                     className={`badge ${
-                        isComingSoon ? "coming-badge" : ""
+                        isComingSoon
+                            ? "coming-badge"
+                            : ""
                     }`}
                 >
 
@@ -153,54 +233,122 @@ export default function SurveyCard({
 
                 </span>
 
-                <h2>{survey.title}</h2>
+                <h2>
+                    {survey.title}
+                </h2>
 
             </div>
+
+
+            {/*
+            |--------------------------------------------------------------------------
+            | DESCRIPTION
+            |--------------------------------------------------------------------------
+            */}
+
+            {survey.description && (
+
+                <div className="survey-description">
+
+                    <p>
+                        {survey.description}
+                    </p>
+
+                </div>
+
+            )}
+
+
+            {/*
+            |--------------------------------------------------------------------------
+            | SURVEY DETAILS
+            |--------------------------------------------------------------------------
+            */}
 
             <div className="survey-details">
 
                 <div>
 
-                    <strong>Reward</strong>
+                    <strong>
+                        Reward
+                    </strong>
 
-                    <p>KSh {survey.reward}</p>
-
-                </div>
-
-                <div>
-
-                    <strong>Estimated Time</strong>
-
-                    <p>{survey.timeEstimate} Minutes</p>
+                    <p>
+                        KSh {survey.reward}
+                    </p>
 
                 </div>
 
+
                 <div>
 
-                    <strong>Questions</strong>
+                    <strong>
+                        Estimated Time
+                    </strong>
 
-                    <p>{survey.questions?.length ?? 0}</p>
+                    <p>
+                        {survey.timeEstimate} Minutes
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Questions
+                    </strong>
+
+                    <p>
+                        {survey.questions?.length ?? 0}
+                    </p>
 
                 </div>
 
             </div>
 
+
+            {/*
+            |--------------------------------------------------------------------------
+            | COMING SOON MESSAGE
+            |--------------------------------------------------------------------------
+            */}
+
             {isComingSoon && (
 
-                <p className="coming-text">
+                <div className="coming-text">
 
-                    This survey isn't available yet.
+                    <strong>
+                        🚀 This survey is coming soon
+                    </strong>
 
-                    It will become available once activated by the administrator.
+                    <p>
+                        The survey is currently being prepared.
+                        You can view all its details now, and the
+                        Start Survey button will become available
+                        once the survey is activated.
+                    </p>
 
-                </p>
+                </div>
 
             )}
 
-            {renderAction()}
+
+            {/*
+            |--------------------------------------------------------------------------
+            | ACTION
+            |--------------------------------------------------------------------------
+            */}
+
+            <div className="survey-action">
+
+                {renderAction()}
+
+            </div>
 
         </div>
 
     );
 
 }
+
