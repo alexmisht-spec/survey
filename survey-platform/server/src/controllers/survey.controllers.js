@@ -848,21 +848,76 @@ export const submitSurvey = async (req, res) => {
 
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | MUST BE ACTIVE
-        |--------------------------------------------------------------------------
-        */
-
-        /*
+/*
 |--------------------------------------------------------------------------
-| MUST BE ACTIVE
+| CHECK USER ASSIGNMENT
 |--------------------------------------------------------------------------
+|
+| An assigned user is allowed to complete a COMING_SOON survey.
+|
+| The survey's global status still controls users who were not
+| explicitly assigned.
+|
+*/
+
+const assignment =
+    await prisma.surveyAssignment.findFirst({
+
+        where: {
+
+            surveyId,
+
+            userId,
+
+            completed: false
+
+        }
+
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| BLOCK LOCKED / CLOSED SURVEYS
+|--------------------------------------------------------------------------
+|
+| These statuses always override an assignment.
+|
 */
 
 if (
-    survey.status !== "ACTIVE"
+    survey.status === "LOCKED" ||
+    survey.status === "CLOSED"
+) {
+
+    return res.status(400).json({
+
+        success: false,
+
+        message:
+            "This survey is currently unavailable."
+
+    });
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ACTIVE / ASSIGNED CHECK
+|--------------------------------------------------------------------------
+|
+| ACTIVE survey:
+|     Anyone who is otherwise eligible can continue.
+|
+| COMING_SOON survey:
+|     Only an explicitly assigned user can continue.
+|
+*/
+
+if (
+    survey.status !== "ACTIVE" &&
+    !assignment
 ) {
 
     return res.status(400).json({
@@ -875,6 +930,8 @@ if (
     });
 
 }
+
+
 
 
         /*
