@@ -1,3 +1,4 @@
+
 import prisma from "../config/prisma.js";
 
 /*
@@ -11,57 +12,95 @@ export const createSurvey = async (req, res) => {
     try {
 
         const {
-
             title,
             description,
             reward,
             timeEstimate,
             status,
             questions
-
         } = req.body;
 
         if (!title || !description || !reward) {
 
             return res.status(400).json({
-
                 success: false,
-
                 message: "Title, description and reward are required."
-
             });
 
         }
 
-        if (!questions || questions.length === 0) {
+        if (!questions || !Array.isArray(questions) || questions.length === 0) {
 
             return res.status(400).json({
-
                 success: false,
-
                 message: "Please add at least one question."
-
             });
 
         }
-        console.log({
-    reward,
-    rewardType: typeof reward,
-    timeEstimate,
-    timeEstimateType: typeof timeEstimate,
-});
+
+        const surveyStatus = status || "COMING_SOON";
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE SURVEY
+        |--------------------------------------------------------------------------
+        */
 
         const survey = await prisma.$transaction(async (tx) => {
 
-           const newSurvey = await tx.survey.create({
-    data: {
-        title,
-        description,
-        reward: Number(reward),
-        timeEstimate: Number(timeEstimate),
-        status: status || "COMING_SOON"
-    }
-});
+            /*
+            |--------------------------------------------------------------------------
+            | If this survey is being created as ACTIVE,
+            | move all other surveys to COMING_SOON.
+            |--------------------------------------------------------------------------
+            */
+
+            if (surveyStatus === "ACTIVE") {
+
+                await tx.survey.updateMany({
+
+                    where: {
+                        status: "ACTIVE"
+                    },
+
+                    data: {
+                        status: "COMING_SOON"
+                    }
+
+                });
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE SURVEY
+            |--------------------------------------------------------------------------
+            */
+
+            const newSurvey = await tx.survey.create({
+
+                data: {
+
+                    title,
+
+                    description,
+
+                    reward: Number(reward),
+
+                    timeEstimate:
+                        Number(timeEstimate) || 10,
+
+                    status: surveyStatus
+
+                }
+
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE QUESTIONS
+            |--------------------------------------------------------------------------
+            */
 
             await tx.surveyQuestion.createMany({
 
@@ -73,20 +112,17 @@ export const createSurvey = async (req, res) => {
 
                     questionType: question.questionType,
 
-                    placeholder: question.placeholder || null,
+                    placeholder:
+                        question.placeholder || null,
 
-                    required: question.required,
+                    required:
+                        question.required !== false,
 
                     options:
-
                         ["RADIO", "CHECKBOX", "SELECT"].includes(
-
                             question.questionType
-
                         )
-
                             ? question.options
-
                             : null,
 
                     order: index + 1
@@ -95,15 +131,59 @@ export const createSurvey = async (req, res) => {
 
             });
 
+            /*
+            |--------------------------------------------------------------------------
+            | IF ACTIVE, AUTOMATICALLY ASSIGN TO ALL VERIFIED USERS
+            |--------------------------------------------------------------------------
+            */
+
+            if (surveyStatus === "ACTIVE") {
+
+                const verifiedUsers =
+                    await tx.user.findMany({
+
+                        where: {
+                            status: "VERIFIED"
+                        },
+
+                        select: {
+                            id: true
+                        }
+
+                    });
+
+                if (verifiedUsers.length > 0) {
+
+                    await tx.surveyAssignment.createMany({
+
+                        data: verifiedUsers.map(user => ({
+
+                            userId: user.id,
+
+                            surveyId: newSurvey.id
+
+                        })),
+
+                        skipDuplicates: true
+
+                    });
+
+                }
+
+            }
+
             return newSurvey;
 
         });
 
-        res.status(201).json({
+        return res.status(201).json({
 
             success: true,
 
-            message: "Survey created successfully.",
+            message:
+                surveyStatus === "ACTIVE"
+                    ? "Survey created, activated and assigned to verified users."
+                    : "Survey created successfully.",
 
             survey
 
@@ -111,9 +191,9 @@ export const createSurvey = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error("CREATE SURVEY ERROR:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -124,11 +204,14 @@ export const createSurvey = async (req, res) => {
     }
 
 };
+
+
 /*
 |--------------------------------------------------------------------------
 | GET ALL SURVEYS
 |--------------------------------------------------------------------------
 */
+
 export const getAllSurveys = async (req, res) => {
 
     try {
@@ -138,6 +221,7 @@ export const getAllSurveys = async (req, res) => {
             include: {
 
                 questions: true,
+
                 assignments: true
 
             },
@@ -150,7 +234,7 @@ export const getAllSurveys = async (req, res) => {
 
         });
 
-        res.json({
+        return res.json({
 
             success: true,
 
@@ -162,9 +246,9 @@ export const getAllSurveys = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error("GET ALL SURVEYS ERROR:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -175,6 +259,8 @@ export const getAllSurveys = async (req, res) => {
     }
 
 };
+
+
 /*
 |--------------------------------------------------------------------------
 | GET SINGLE SURVEY
@@ -221,7 +307,7 @@ export const getSurvey = async (req, res) => {
 
         }
 
-        res.json({
+        return res.json({
 
             success: true,
 
@@ -231,9 +317,9 @@ export const getSurvey = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error("GET SURVEY ERROR:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -244,9 +330,22 @@ export const getSurvey = async (req, res) => {
     }
 
 };
+
+
 /*
 |--------------------------------------------------------------------------
 | UPDATE SURVEY
+|--------------------------------------------------------------------------
+|
+| This allows admin to change:
+|
+| ACTIVE
+| COMING_SOON
+| LOCKED
+| CLOSED
+|
+| If changed to ACTIVE, users are automatically assigned.
+|
 |--------------------------------------------------------------------------
 */
 
@@ -257,42 +356,178 @@ export const updateSurvey = async (req, res) => {
         const {
 
             title,
-
             description,
-
             reward,
-
+            timeEstimate,
             status
 
         } = req.body;
 
-        const survey = await prisma.survey.update({
+        const existingSurvey =
+            await prisma.survey.findUnique({
 
-            where: {
+                where: {
+                    id: req.params.id
+                }
 
-                id: req.params.id
+            });
 
-            },
+        if (!existingSurvey) {
 
-            data: {
+            return res.status(404).json({
 
-                title,
+                success: false,
 
-                description,
+                message: "Survey not found."
 
-                reward,
+            });
 
-                status
+        }
 
-            }
+        const newStatus =
+            status || existingSurvey.status;
 
-        });
+        const survey =
+            await prisma.$transaction(async (tx) => {
 
-        res.json({
+                /*
+                |--------------------------------------------------------------------------
+                | ONLY ONE ACTIVE SURVEY
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    newStatus === "ACTIVE" &&
+                    existingSurvey.status !== "ACTIVE"
+                ) {
+
+                    await tx.survey.updateMany({
+
+                        where: {
+
+                            status: "ACTIVE",
+
+                            id: {
+                                not: req.params.id
+                            }
+
+                        },
+
+                        data: {
+
+                            status: "COMING_SOON"
+
+                        }
+
+                    });
+
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE SURVEY
+                |--------------------------------------------------------------------------
+                */
+
+                const updatedSurvey =
+                    await tx.survey.update({
+
+                        where: {
+
+                            id: req.params.id
+
+                        },
+
+                        data: {
+
+                            ...(title !== undefined && {
+                                title
+                            }),
+
+                            ...(description !== undefined && {
+                                description
+                            }),
+
+                            ...(reward !== undefined && {
+                                reward: Number(reward)
+                            }),
+
+                            ...(timeEstimate !== undefined && {
+                                timeEstimate:
+                                    Number(timeEstimate)
+                            }),
+
+                            status: newStatus
+
+                        }
+
+                    });
+
+                /*
+                |--------------------------------------------------------------------------
+                | ACTIVATE SURVEY
+                |--------------------------------------------------------------------------
+                |
+                | When admin changes a survey to ACTIVE,
+                | automatically assign it to all verified users.
+                |
+                |--------------------------------------------------------------------------
+                */
+
+                if (newStatus === "ACTIVE") {
+
+                    const verifiedUsers =
+                        await tx.user.findMany({
+
+                            where: {
+
+                                status: "VERIFIED"
+
+                            },
+
+                            select: {
+
+                                id: true
+
+                            }
+
+                        });
+
+                    if (verifiedUsers.length > 0) {
+
+                        await tx.surveyAssignment.createMany({
+
+                            data: verifiedUsers.map(user => ({
+
+                                userId: user.id,
+
+                                surveyId:
+                                    updatedSurvey.id
+
+                            })),
+
+                            skipDuplicates: true
+
+                        });
+
+                    }
+
+                }
+
+                return updatedSurvey;
+
+            });
+
+        return res.json({
 
             success: true,
 
-            message: "Survey updated.",
+            message:
+                newStatus === "ACTIVE"
+                    ? "Survey activated and assigned to verified users."
+                    : newStatus === "COMING_SOON"
+                    ? "Survey moved to Coming Soon."
+                    : "Survey updated successfully.",
 
             survey
 
@@ -300,9 +535,9 @@ export const updateSurvey = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error("UPDATE SURVEY ERROR:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -313,6 +548,410 @@ export const updateSurvey = async (req, res) => {
     }
 
 };
+
+
+/*
+|--------------------------------------------------------------------------
+| SET SURVEY STATUS
+|--------------------------------------------------------------------------
+|
+| Dedicated admin endpoint.
+|
+| Body:
+|
+| {
+|     "status": "ACTIVE"
+| }
+|
+| or
+|
+| {
+|     "status": "COMING_SOON"
+| }
+|
+|--------------------------------------------------------------------------
+*/
+
+export const setSurveyStatus = async (req, res) => {
+
+    try {
+
+        const { status } = req.body;
+
+        const allowedStatuses = [
+
+            "ACTIVE",
+            "COMING_SOON",
+            "LOCKED",
+            "CLOSED"
+
+        ];
+
+        if (!allowedStatuses.includes(status)) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message:
+                    "Invalid survey status."
+
+            });
+
+        }
+
+        const survey =
+            await prisma.survey.findUnique({
+
+                where: {
+
+                    id: req.params.id
+
+                }
+
+            });
+
+        if (!survey) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message:
+                    "Survey not found."
+
+            });
+
+        }
+
+        const updatedSurvey =
+            await prisma.$transaction(async (tx) => {
+
+                /*
+                |--------------------------------------------------------------------------
+                | IF ACTIVATING
+                |--------------------------------------------------------------------------
+                */
+
+                if (status === "ACTIVE") {
+
+                    /*
+                    |--------------------------------------------------------------
+                    | Move current active survey to Coming Soon
+                    |--------------------------------------------------------------
+                    */
+
+                    await tx.survey.updateMany({
+
+                        where: {
+
+                            status: "ACTIVE",
+
+                            id: {
+                                not: survey.id
+                            }
+
+                        },
+
+                        data: {
+
+                            status:
+                                "COMING_SOON"
+
+                        }
+
+                    });
+
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE STATUS
+                |--------------------------------------------------------------------------
+                */
+
+                const updated =
+                    await tx.survey.update({
+
+                        where: {
+
+                            id: survey.id
+
+                        },
+
+                        data: {
+
+                            status
+
+                        }
+
+                    });
+
+                /*
+                |--------------------------------------------------------------------------
+                | ASSIGN ACTIVE SURVEY
+                |--------------------------------------------------------------------------
+                */
+
+                if (status === "ACTIVE") {
+
+                    const verifiedUsers =
+                        await tx.user.findMany({
+
+                            where: {
+
+                                status:
+                                    "VERIFIED"
+
+                            },
+
+                            select: {
+
+                                id: true
+
+                            }
+
+                        });
+
+                    if (verifiedUsers.length > 0) {
+
+                        await tx.surveyAssignment.createMany({
+
+                            data:
+                                verifiedUsers.map(
+                                    user => ({
+
+                                        userId:
+                                            user.id,
+
+                                        surveyId:
+                                            survey.id
+
+                                    })
+                                ),
+
+                            skipDuplicates: true
+
+                        });
+
+                    }
+
+                }
+
+                return updated;
+
+            });
+
+        return res.json({
+
+            success: true,
+
+            message:
+                status === "ACTIVE"
+                    ? "Survey activated and assigned to verified users."
+                    : status === "COMING_SOON"
+                    ? "Survey moved to Coming Soon."
+                    : `Survey status changed to ${status}.`,
+
+            survey: updatedSurvey
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "SET SURVEY STATUS ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+
+            success: false,
+
+            message:
+                "Server Error"
+
+        });
+
+    }
+
+};
+
+
+/*
+|--------------------------------------------------------------------------
+| ACTIVATE SURVEY
+|--------------------------------------------------------------------------
+|
+| Kept for compatibility with your existing frontend.
+|
+|--------------------------------------------------------------------------
+*/
+
+export const activateSurvey = async (req, res) => {
+
+    try {
+
+        const survey =
+            await prisma.survey.findUnique({
+
+                where: {
+
+                    id: req.params.id
+
+                }
+
+            });
+
+        if (!survey) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message:
+                    "Survey not found."
+
+            });
+
+        }
+
+        await prisma.$transaction(async (tx) => {
+
+            /*
+            |--------------------------------------------------------------------------
+            | MOVE OTHER ACTIVE SURVEYS TO COMING SOON
+            |--------------------------------------------------------------------------
+            */
+
+            await tx.survey.updateMany({
+
+                where: {
+
+                    status: "ACTIVE",
+
+                    id: {
+
+                        not: survey.id
+
+                    }
+
+                },
+
+                data: {
+
+                    status:
+                        "COMING_SOON"
+
+                }
+
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | ACTIVATE SELECTED SURVEY
+            |--------------------------------------------------------------------------
+            */
+
+            await tx.survey.update({
+
+                where: {
+
+                    id: survey.id
+
+                },
+
+                data: {
+
+                    status:
+                        "ACTIVE"
+
+                }
+
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | GET VERIFIED USERS
+            |--------------------------------------------------------------------------
+            */
+
+            const users =
+                await tx.user.findMany({
+
+                    where: {
+
+                        status:
+                            "VERIFIED"
+
+                    },
+
+                    select: {
+
+                        id: true
+
+                    }
+
+                });
+
+            /*
+            |--------------------------------------------------------------------------
+            | ASSIGN SURVEY
+            |--------------------------------------------------------------------------
+            */
+
+            if (users.length > 0) {
+
+                await tx.surveyAssignment.createMany({
+
+                    data: users.map(user => ({
+
+                        userId:
+                            user.id,
+
+                        surveyId:
+                            survey.id
+
+                    })),
+
+                    skipDuplicates: true
+
+                });
+
+            }
+
+        });
+
+        return res.json({
+
+            success: true,
+
+            message:
+                "Survey activated and assigned to verified users."
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "ACTIVATE SURVEY ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+
+            success: false,
+
+            message:
+                "Server Error"
+
+        });
+
+    }
+
+};
+
+
 /*
 |--------------------------------------------------------------------------
 | DELETE SURVEY
@@ -333,144 +972,36 @@ export const deleteSurvey = async (req, res) => {
 
         });
 
-        res.json({
+        return res.json({
 
             success: true,
 
-            message: "Survey deleted."
+            message:
+                "Survey deleted."
 
         });
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "DELETE SURVEY ERROR:",
+            error
+        );
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
-            message: "Server Error"
+            message:
+                "Server Error"
 
         });
 
     }
 
 };
-/*
-|--------------------------------------------------------------------------
-| ACTIVATE SURVEY
-|--------------------------------------------------------------------------
-*/
 
-export const activateSurvey = async (req, res) => {
 
-    try {
-
-        await prisma.$transaction(async (tx) => {
-
-            await tx.survey.updateMany({
-
-                data: {
-
-                    status: "COMING_SOON"
-
-                }
-
-            });
-
-            const survey = await tx.survey.update({
-
-                where: {
-
-                    id: req.params.id
-
-                },
-
-                data: {
-
-                    status: "ACTIVE"
-
-                }
-
-            });
-
-            const users = await tx.user.findMany({
-
-                where: {
-
-                    status: "VERIFIED"
-
-                },
-
-                select: {
-
-                    id: true
-
-                }
-
-            });
-
-            for (const user of users) {
-
-                const exists = await tx.surveyAssignment.findUnique({
-
-                    where: {
-
-                        userId_surveyId: {
-
-                            userId: user.id,
-
-                            surveyId: survey.id
-
-                        }
-
-                    }
-
-                });
-
-                if (!exists) {
-
-                    await tx.surveyAssignment.create({
-
-                        data: {
-
-                            userId: user.id,
-
-                            surveyId: survey.id
-
-                        }
-
-                    });
-
-                }
-
-            }
-
-        });
-
-        res.json({
-
-            success: true,
-
-            message: "Survey activated and assigned."
-
-        });
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-
-            success: false,
-
-            message: "Server Error"
-
-        });
-
-    }
-
-};
 /*
 |--------------------------------------------------------------------------
 | GET SURVEY DETAILS
@@ -481,71 +1012,82 @@ export const getSurveyDetails = async (req, res) => {
 
     try {
 
-        const survey = await prisma.survey.findUnique({
+        const survey =
+            await prisma.survey.findUnique({
 
-            where: {
+                where: {
 
-                id: req.params.id
-
-            },
-
-            include: {
-
-                questions: {
-
-                    orderBy: {
-
-                        order: "asc"
-
-                    }
+                    id: req.params.id
 
                 },
 
-                assignments: {
+                include: {
 
-                    include: {
+                    questions: {
 
-                        user: {
+                        orderBy: {
 
-                            select: {
+                            order:
+                                "asc"
 
-                                firstName: true,
+                        }
 
-                                lastName: true,
+                    },
 
-                                email: true
+                    assignments: {
+
+                        include: {
+
+                            user: {
+
+                                select: {
+
+                                    firstName:
+                                        true,
+
+                                    lastName:
+                                        true,
+
+                                    email:
+                                        true
+
+                                }
 
                             }
 
                         }
 
-                    }
+                    },
 
-                },
+                    responses: {
 
-                responses: {
+                        include: {
 
-                    include: {
+                            user: {
 
-                        user: {
+                                select: {
 
-                            select: {
+                                    firstName:
+                                        true,
 
-                                firstName: true,
+                                    lastName:
+                                        true,
 
-                                lastName: true,
+                                    email:
+                                        true
 
-                                email: true
+                                }
 
-                            }
+                            },
 
-                        },
+                            answers: {
 
-                        answers: {
+                                include: {
 
-                            include: {
+                                    question:
+                                        true
 
-                                question: true
+                                }
 
                             }
 
@@ -555,9 +1097,7 @@ export const getSurveyDetails = async (req, res) => {
 
                 }
 
-            }
-
-        });
+            });
 
         if (!survey) {
 
@@ -565,35 +1105,47 @@ export const getSurveyDetails = async (req, res) => {
 
                 success: false,
 
-                message: "Survey not found."
+                message:
+                    "Survey not found."
 
             });
 
         }
 
-        const totalAssigned = survey.assignments.length;
+        const totalAssigned =
+            survey.assignments.length;
 
-        const totalCompleted = survey.responses.length;
+        const totalCompleted =
+            survey.responses.length;
 
-        const completionRate = totalAssigned
-            ? ((totalCompleted / totalAssigned) * 100).toFixed(1)
-            : 0;
+        const completionRate =
+            totalAssigned
+                ? (
+                    (totalCompleted /
+                        totalAssigned) *
+                    100
+                ).toFixed(1)
+                : 0;
 
-        const totalPaid = survey.responses.reduce(
+        const totalPaid =
+            survey.responses.reduce(
 
-            (sum, response) =>
+                (sum, response) =>
 
-                response.rewardPaid
+                    response.rewardPaid
 
-                    ? sum + Number(survey.reward)
+                        ? sum +
+                          Number(
+                              survey.reward
+                          )
 
-                    : sum,
+                        : sum,
 
-            0
+                0
 
-        );
+            );
 
-        res.json({
+        return res.json({
 
             success: true,
 
@@ -615,16 +1167,21 @@ export const getSurveyDetails = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "GET SURVEY DETAILS ERROR:",
+            error
+        );
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
-            message: "Server Error"
+            message:
+                "Server Error"
 
         });
 
     }
 
 };
+
