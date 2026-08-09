@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { getMySurveys } from "../../api/survey.api";
 import SurveyCard from "./components/SurveyCard";
@@ -11,6 +12,12 @@ export default function DashboardSurveys() {
     const [completed, setCompleted] = useState([]);
     const [comingSoon, setComingSoon] = useState([]);
 
+    /*
+    |--------------------------------------------------------------------------
+    | LOAD SURVEYS
+    |--------------------------------------------------------------------------
+    */
+
     const loadSurveys = async () => {
 
         try {
@@ -19,13 +26,24 @@ export default function DashboardSurveys() {
 
             const res = await getMySurveys();
 
-            setAvailable(res.data.available || []);
-            setCompleted(res.data.completed || []);
-            setComingSoon(res.data.comingSoon || []);
+            setAvailable(
+                res.data.available || []
+            );
+
+            setCompleted(
+                res.data.completed || []
+            );
+
+            setComingSoon(
+                res.data.comingSoon || []
+            );
 
         } catch (err) {
 
-            console.error(err);
+            console.error(
+                "LOAD SURVEYS ERROR:",
+                err
+            );
 
         } finally {
 
@@ -35,11 +53,23 @@ export default function DashboardSurveys() {
 
     };
 
+    /*
+    |--------------------------------------------------------------------------
+    | INITIAL LOAD
+    |--------------------------------------------------------------------------
+    */
+
     useEffect(() => {
 
         loadSurveys();
 
     }, []);
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOADING
+    |--------------------------------------------------------------------------
+    */
 
     if (loading) {
 
@@ -49,7 +79,9 @@ export default function DashboardSurveys() {
 
                 <div className="loader"></div>
 
-                <p>Loading Surveys...</p>
+                <p>
+                    Loading Surveys...
+                </p>
 
             </div>
 
@@ -57,167 +89,181 @@ export default function DashboardSurveys() {
 
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | PAGE
+    |--------------------------------------------------------------------------
+    */
+
     return (
 
         <div className="surveys-page">
 
+            {/* -----------------------------------------------------------------
+                HEADER
+            ----------------------------------------------------------------- */}
+
             <div className="page-header">
 
-                <h1>My Surveys</h1>
+                <h1>
+                    My Surveys
+                </h1>
 
                 <p>
-
-                    Complete available surveys and keep track of your completed work.
-
+                    Complete available surveys and keep track
+                    of your completed work.
                 </p>
 
             </div>
 
-            {/* AVAILABLE */}
+
+            {/* -----------------------------------------------------------------
+                AVAILABLE SURVEYS
+            ----------------------------------------------------------------- */}
 
             <section className="survey-section">
 
-                <h2>Available Surveys</h2>
+                <h2>
+                    Available Surveys
+                </h2>
 
-                {
+                {available.length > 0 ? (
 
-                    available.length > 0 ?
+                    <div className="survey-grid">
 
-                        <div className="survey-grid">
+                        {available.map((item) => (
 
-                            {
+                            <SurveyCard
 
-                                available.map(item => (
+                                key={item.id}
 
-                                    <SurveyCard
+                                survey={item.survey}
 
-                                        key={item.id}
+                                verified={true}
 
-                                        survey={item.survey}
+                                verificationStatus="APPROVED"
 
-                                        verified={true}
+                                completed={false}
 
-                                        verificationStatus="APPROVED"
+                                comingSoon={false}
 
-                                        completed={false}
+                                onCompleted={loadSurveys}
 
-                                        comingSoon={false}
+                            />
 
-                                        onCompleted={loadSurveys}
+                        ))}
 
-                                    />
+                    </div>
 
-                                ))
+                ) : (
 
-                            }
+                    <div className="empty-box">
 
-                        </div>
+                        No active surveys available
+                        at the moment.
 
-                        :
+                    </div>
 
-                        <div className="empty-box">
-
-                            No active surveys assigned.
-
-                        </div>
-
-                }
+                )}
 
             </section>
 
-            {/* COMPLETED */}
+
+            {/* -----------------------------------------------------------------
+                COMPLETED SURVEYS
+            ----------------------------------------------------------------- */}
 
             <section className="survey-section">
 
-                <h2>Completed Surveys</h2>
+                <h2>
+                    Completed Surveys
+                </h2>
 
-                {
+                {completed.length > 0 ? (
 
-                    completed.length > 0 ?
+                    <div className="survey-grid">
 
-                        <div className="survey-grid">
+                        {completed.map((item) => (
 
-                            {
+                            <SurveyCard
 
-                                completed.map(item => (
+                                key={item.id}
 
-                                    <SurveyCard
+                                survey={item.survey}
 
-                                        key={item.id}
+                                completed={true}
 
-                                        survey={item.survey}
+                                verified={true}
 
-                                        completed={true}
+                                verificationStatus="APPROVED"
 
-                                        verified={true}
+                                comingSoon={false}
 
-                                        verificationStatus="APPROVED"
+                            />
 
-                                    />
+                        ))}
 
-                                ))
+                    </div>
 
-                            }
+                ) : (
 
-                        </div>
+                    <div className="empty-box">
 
-                        :
+                        You haven't completed any
+                        surveys yet.
 
-                        <div className="empty-box">
+                    </div>
 
-                            You haven't completed any surveys yet.
-
-                        </div>
-
-                }
+                )}
 
             </section>
 
-            {/* COMING SOON */}
+
+            {/* -----------------------------------------------------------------
+                COMING SOON
+            ----------------------------------------------------------------- */}
 
             <section className="survey-section">
 
-                <h2>Coming Soon</h2>
+                <h2>
+                    Coming Soon
+                </h2>
 
-                {
+                {comingSoon.length > 0 ? (
 
-                    comingSoon.length > 0 ?
+                    <div className="survey-grid">
 
-                        <div className="survey-grid">
+                        {comingSoon.map((survey) => (
 
-                            {
+                            <SurveyCard
 
-                                comingSoon.map(item => (
+                                key={survey.id}
 
-                                    <SurveyCard
+                                survey={survey}
 
-                                        key={item.id}
+                                completed={false}
 
-                                        survey={item}
+                                comingSoon={true}
 
-                                        completed={false}
+                                verified={false}
 
-                                        comingSoon={true}
+                                verificationStatus="PENDING"
 
-                                        verified={false}
+                            />
 
-                                    />
+                        ))}
 
-                                ))
+                    </div>
 
-                            }
+                ) : (
 
-                        </div>
+                    <div className="empty-box">
 
-                        :
+                        More surveys coming soon.
 
-                        <div className="empty-box">
+                    </div>
 
-                            More surveys coming soon.
-
-                        </div>
-
-                }
+                )}
 
             </section>
 
@@ -226,3 +272,4 @@ export default function DashboardSurveys() {
     );
 
 }
+
