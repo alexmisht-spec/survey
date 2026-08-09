@@ -41,9 +41,7 @@ export const getMySurveys = async (req, res) => {
             await prisma.surveyAssignment.findMany({
 
                 where: {
-
                     userId
-
                 },
 
                 include: {
@@ -55,9 +53,7 @@ export const getMySurveys = async (req, res) => {
                             questions: {
 
                                 orderBy: {
-
                                     order: "asc"
-
                                 }
 
                             }
@@ -69,9 +65,7 @@ export const getMySurveys = async (req, res) => {
                 },
 
                 orderBy: {
-
                     assignedAt: "desc"
-
                 }
 
             });
@@ -81,9 +75,6 @@ export const getMySurveys = async (req, res) => {
         |--------------------------------------------------------------------------
         | GET COMPLETED SURVEYS
         |--------------------------------------------------------------------------
-        |
-        | We use SurveyResponse as the permanent record of completion.
-        |
         */
 
         const completedResponses =
@@ -118,11 +109,51 @@ export const getMySurveys = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | GET ALL ACTIVE SURVEYS
+        | EXPLICITLY ASSIGNED SURVEYS
         |--------------------------------------------------------------------------
         |
-        | These are ordered oldest-first so the first survey becomes
-        | the primary survey.
+        | IMPORTANT:
+        |
+        | An explicit assignment gives the user access to the survey even
+        | when the survey is marked COMING_SOON.
+        |
+        | However, LOCKED and CLOSED surveys remain unavailable.
+        |
+        */
+
+        const assignedAvailable =
+            assignments.filter(
+
+                assignment => {
+
+                    const survey = assignment.survey;
+
+                    return (
+
+                        !assignment.completed &&
+
+                        !completedSurveyIds.has(
+                            assignment.surveyId
+                        ) &&
+
+                        (
+                            survey.status === "ACTIVE" ||
+                            survey.status === "COMING_SOON"
+                        )
+
+                    );
+
+                }
+
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GET ACTIVE SURVEYS
+        |--------------------------------------------------------------------------
+        |
+        | Automatic availability ONLY works with ACTIVE surveys.
         |
         */
 
@@ -160,22 +191,17 @@ export const getMySurveys = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | ASSIGNED ACTIVE SURVEYS
+        | ASSIGNED SURVEY IDS
         |--------------------------------------------------------------------------
         */
 
-        const assignedAvailable =
-            assignments.filter(
+        const assignedSurveyIds =
+            new Set(
 
-                assignment =>
-
-                    !assignment.completed &&
-
-                    assignment.survey.status === "ACTIVE" &&
-
-                    !completedSurveyIds.has(
+                assignedAvailable.map(
+                    assignment =>
                         assignment.surveyId
-                    )
+                )
 
             );
 
@@ -185,22 +211,9 @@ export const getMySurveys = async (req, res) => {
         | AUTOMATIC SURVEY
         |--------------------------------------------------------------------------
         |
-        | Find the first ACTIVE survey that:
-        |
-        | - has not been completed
-        | - is not already assigned as available
+        | Only ACTIVE surveys participate in automatic rotation.
         |
         */
-
-        const assignedSurveyIds =
-            new Set(
-
-                assignedAvailable.map(
-                    assignment => assignment.surveyId
-                )
-
-            );
-
 
         const automaticSurvey =
             activeSurveys.find(
@@ -220,19 +233,15 @@ export const getMySurveys = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | BUILD AVAILABLE LIST
+        | AVAILABLE
         |--------------------------------------------------------------------------
+        |
+        | Explicit assignments always have priority.
+        |
         */
 
         let available = [];
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | FIRST PRIORITY:
-        | ASSIGNED SURVEYS
-        |--------------------------------------------------------------------------
-        */
 
         if (assignedAvailable.length > 0) {
 
@@ -240,24 +249,14 @@ export const getMySurveys = async (req, res) => {
 
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | SECOND PRIORITY:
-        | AUTOMATIC SURVEY
-        |--------------------------------------------------------------------------
-        |
-        | If there is no assigned survey, automatically expose ONE survey.
-        |
-        */
-
         else if (automaticSurvey) {
 
             available = [
 
                 {
 
-                    id: `auto-${automaticSurvey.id}`,
+                    id:
+                        `auto-${automaticSurvey.id}`,
 
                     userId,
 
@@ -289,7 +288,7 @@ export const getMySurveys = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | AVAILABLE SURVEY IDS
+        | AVAILABLE IDS
         |--------------------------------------------------------------------------
         */
 
@@ -330,42 +329,9 @@ export const getMySurveys = async (req, res) => {
         |
         | IMPORTANT:
         |
-        | ALL remaining surveys appear here.
+        | Database COMING_SOON surveys are shown here ONLY when they are
+        | NOT explicitly assigned to this user.
         |
-        | They do NOT need to have COMING_SOON status.
-        |
-        | This is what gives you:
-        |
-        | ACTIVE survey #1 -> Available
-        |
-        | ACTIVE survey #2 -> Coming Soon
-        |
-        | ACTIVE survey #3 -> Coming Soon
-        |
-        | etc.
-        |
-        */
-
-        const comingSoon =
-            activeSurveys.filter(
-
-                survey =>
-
-                    !availableSurveyIds.has(
-                        survey.id
-                    ) &&
-
-                    !completedSurveyIds.has(
-                        survey.id
-                    )
-
-            );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | ALSO INCLUDE DATABASE COMING_SOON SURVEYS
-        |--------------------------------------------------------------------------
         */
 
         const databaseComingSoon =
@@ -400,42 +366,20 @@ export const getMySurveys = async (req, res) => {
             });
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | MERGE COMING SOON SURVEYS
-        |--------------------------------------------------------------------------
-        */
+        const comingSoon =
+            databaseComingSoon.filter(
 
-        const existingComingSoonIds =
-            new Set(
+                survey =>
 
-                comingSoon.map(
-                    survey => survey.id
-                )
+                    !availableSurveyIds.has(
+                        survey.id
+                    ) &&
+
+                    !completedSurveyIds.has(
+                        survey.id
+                    )
 
             );
-
-
-        for (
-            const survey
-            of databaseComingSoon
-        ) {
-
-            if (
-                !existingComingSoonIds.has(
-                    survey.id
-                ) &&
-
-                !completedSurveyIds.has(
-                    survey.id
-                )
-            ) {
-
-                comingSoon.push(survey);
-
-            }
-
-        }
 
 
         /*
@@ -452,7 +396,14 @@ export const getMySurveys = async (req, res) => {
 
             completed,
 
-            comingSoon
+            comingSoon,
+
+            verified:
+                req.user.status === "VERIFIED",
+
+            verificationStatus:
+                req.user.verification?.status ||
+                "NOT_SUBMITTED"
 
         });
 
@@ -461,16 +412,16 @@ export const getMySurveys = async (req, res) => {
     catch (error) {
 
         console.error(
-            "GET MY SURVEYS ERROR"
+            "GET MY SURVEYS ERROR:",
+            error
         );
-
-        console.error(error);
 
         return res.status(500).json({
 
             success: false,
 
-            message: error.message
+            message:
+                error.message
 
         });
 
@@ -502,8 +453,7 @@ export const getSurvey = async (req, res) => {
 
         const userId = req.user.id;
 
-        const surveyId =
-            req.params.id;
+        const surveyId = req.params.id;
 
 
         /*
@@ -554,29 +504,7 @@ export const getSurvey = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | SURVEY MUST BE ACTIVE
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            survey.status !== "ACTIVE"
-        ) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message:
-                    "This survey is coming soon."
-
-            });
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK IF ALREADY COMPLETED
+        | CHECK COMPLETION
         |--------------------------------------------------------------------------
         */
 
@@ -612,7 +540,7 @@ export const getSurvey = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | CHECK ASSIGNMENT
+        | CHECK EXPLICIT ASSIGNMENT
         |--------------------------------------------------------------------------
         */
 
@@ -634,17 +562,63 @@ export const getSurvey = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | IF ASSIGNED -> ALLOW
+        | EXPLICIT ASSIGNMENT
         |--------------------------------------------------------------------------
+        |
+        | An assigned COMING_SOON survey can be opened.
+        |
+        | LOCKED and CLOSED remain blocked.
+        |
         */
 
         if (assignment) {
+
+            if (
+                survey.status === "LOCKED" ||
+                survey.status === "CLOSED"
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "This survey is currently unavailable."
+
+                });
+
+            }
+
 
             return res.json({
 
                 success: true,
 
-                survey
+                survey,
+
+                assigned: true
+
+            });
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NON-ASSIGNED SURVEY MUST BE ACTIVE
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            survey.status !== "ACTIVE"
+        ) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message:
+                    "This survey is coming soon."
 
             });
 
@@ -655,10 +629,6 @@ export const getSurvey = async (req, res) => {
         |--------------------------------------------------------------------------
         | AUTOMATIC SURVEY
         |--------------------------------------------------------------------------
-        |
-        | Determine which ACTIVE survey is currently the user's
-        | automatic available survey.
-        |
         */
 
         const activeSurveys =
@@ -687,7 +657,7 @@ export const getSurvey = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | FIND FIRST UNCOMPLETED ACTIVE SURVEY
+        | COMPLETED SURVEYS
         |--------------------------------------------------------------------------
         */
 
@@ -721,22 +691,23 @@ export const getSurvey = async (req, res) => {
             );
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | FIRST AVAILABLE AUTOMATIC SURVEY
+        |--------------------------------------------------------------------------
+        */
+
         const firstAvailable =
             activeSurveys.find(
 
                 item =>
+
                     !completedIds.has(
                         item.id
                     )
 
             );
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ONLY THE FIRST AVAILABLE SURVEY CAN BE OPENED
-        |--------------------------------------------------------------------------
-        */
 
         if (
             !firstAvailable ||
@@ -757,7 +728,7 @@ export const getSurvey = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | RETURN SURVEY
+        | SUCCESS
         |--------------------------------------------------------------------------
         */
 
@@ -765,7 +736,9 @@ export const getSurvey = async (req, res) => {
 
             success: true,
 
-            survey
+            survey,
+
+            assigned: false
 
         });
 
@@ -882,20 +855,26 @@ export const submitSurvey = async (req, res) => {
         |--------------------------------------------------------------------------
         */
 
-        if (
-            survey.status !== "ACTIVE"
-        ) {
+        /*
+|--------------------------------------------------------------------------
+| MUST BE ACTIVE
+|--------------------------------------------------------------------------
+*/
 
-            return res.status(400).json({
+if (
+    survey.status !== "ACTIVE"
+) {
 
-                success: false,
+    return res.status(400).json({
 
-                message:
-                    "This survey is no longer active."
+        success: false,
 
-            });
+        message:
+            "This survey is no longer active."
 
-        }
+    });
+
+}
 
 
         /*
@@ -938,27 +917,86 @@ export const submitSurvey = async (req, res) => {
         |--------------------------------------------------------------------------
         */
 
-        const assignment =
-            await prisma.surveyAssignment.findFirst({
+        /*
+|--------------------------------------------------------------------------
+| CHECK ASSIGNMENT
+|--------------------------------------------------------------------------
+*/
 
-                where: {
+const assignment =
+    await prisma.surveyAssignment.findFirst({
 
-                    surveyId,
+        where: {
 
-                    userId,
+            surveyId,
 
-                    completed: false
+            userId,
 
-                },
+            completed: false
 
-                include: {
+        },
 
-                    survey: true
+        include: {
 
-                }
+            survey: true
 
-            });
+        }
 
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| EXPLICITLY ASSIGNED SURVEY
+|--------------------------------------------------------------------------
+|
+| An explicitly assigned survey may be COMING_SOON.
+|
+| LOCKED and CLOSED are still blocked.
+|
+*/
+
+if (assignment) {
+
+    if (
+        survey.status === "LOCKED" ||
+        survey.status === "CLOSED"
+    ) {
+
+        return res.status(400).json({
+
+            success: false,
+
+            message:
+                "This survey is currently unavailable."
+
+        });
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| NON-ASSIGNED SURVEY MUST BE ACTIVE
+|--------------------------------------------------------------------------
+*/
+
+else if (
+    survey.status !== "ACTIVE"
+) {
+
+    return res.status(400).json({
+
+        success: false,
+
+        message:
+            "This survey is no longer active."
+
+    });
+
+}
 
         /*
         |--------------------------------------------------------------------------

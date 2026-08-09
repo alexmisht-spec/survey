@@ -376,136 +376,188 @@ const hasSubmittedVerification =
 
     </div>
 
-    {/* ================= AVAILABLE SURVEYS ================= */}
+   
+{/* ================= AVAILABLE SURVEYS ================= */}
 
-    <div className="survey-category">
+<div className="survey-category">
 
-        <h3 className="survey-group-title">
-            Available Surveys
-        </h3>
+    <h3 className="survey-group-title">
+        Available Surveys
+    </h3>
 
-        {availableSurveys.length > 0 ? (
+    {availableSurveys.length > 0 ? (
 
-            <div className="survey-grid">
+        <div className="survey-grid">
 
-                {availableSurveys.map((assignment) => (
+            {availableSurveys.map((assignment) => (
 
-                    <SurveyCard
-                        key={assignment.id}
-                        survey={assignment.survey}
-                        verified={verified}
-                        verificationStatus={verificationStatus}
-                        completed={false}
-                        comingSoon={false}
-                        onCompleted={loadDashboard}
-                    />
+                <SurveyCard
+                    key={assignment.id}
 
-                ))}
+                    survey={assignment.survey}
 
-            </div>
+                    verified={verified}
 
-        ) : (
+                    verificationStatus={
+                        verificationStatus
+                    }
 
-            <div className="empty-section">
+                    completed={false}
 
-                <h4>No Active Surveys</h4>
+                    /*
+                    |--------------------------------------------------------------------------
+                    | IMPORTANT
+                    |--------------------------------------------------------------------------
+                    | This tells SurveyCard that this survey has been
+                    | explicitly made available to this user.
+                    |
+                    | Therefore even if the global survey status is
+                    | COMING_SOON, this user can see "Start Survey".
+                    |
+                    */
 
-                <p>
-                    There are currently no active surveys assigned to your account.
-                    Please check back later.
-                </p>
+                    available={true}
 
-            </div>
+                    comingSoon={false}
 
-        )}
+                    onCompleted={loadDashboard}
+                />
 
-    </div>
+            ))}
 
-    {/* ================= COMPLETED SURVEYS ================= */}
+        </div>
 
-    <div className="survey-category">
+    ) : (
 
-        <h3 className="survey-group-title">
-            Completed Surveys
-        </h3>
+        <div className="empty-section">
 
-        {completedSurveys.length > 0 ? (
+            <h4>
+                No Active Surveys
+            </h4>
 
-            <div className="survey-grid">
+            <p>
+                There are currently no active surveys assigned to your account.
+                Please check back later.
+            </p>
 
-                {completedSurveys.map((assignment) => (
+        </div>
 
-                    <SurveyCard
-                        key={assignment.id}
-                        survey={assignment.survey}
-                        completed={true}
-                        verified={verified}
-                        verificationStatus={verificationStatus}
-                    />
+    )}
 
-                ))}
+</div>
 
-            </div>
 
-        ) : (
+{/* ================= COMPLETED SURVEYS ================= */}
 
-            <div className="empty-section">
+<div className="survey-category">
 
-                <h4>No Completed Surveys</h4>
+    <h3 className="survey-group-title">
+        Completed Surveys
+    </h3>
 
-                <p>
-                    Once you complete surveys, they'll appear here for your records.
-                </p>
+    {completedSurveys.length > 0 ? (
 
-            </div>
+        <div className="survey-grid">
 
-        )}
+            {completedSurveys.map((assignment) => (
 
-    </div>
+                <SurveyCard
+                    key={assignment.id}
 
-    {/* ================= COMING SOON ================= */}
+                    survey={assignment.survey}
 
-    <div className="survey-category">
+                    completed={true}
 
-        <h3 className="survey-group-title">
-            Coming Soon
-        </h3>
+                    verified={verified}
 
-        {comingSoonSurveys.length > 0 ? (
+                    verificationStatus={
+                        verificationStatus
+                    }
 
-            <div className="survey-grid">
+                    available={false}
 
-                {comingSoonSurveys.map((survey) => (
+                    comingSoon={false}
+                />
 
-                    <SurveyCard
-                        key={survey.id}
-                        survey={survey}
-                        verified={verified}
-                        verificationStatus={verificationStatus}
-                        completed={false}
-                        comingSoon={true}
-                    />
+            ))}
 
-                ))}
+        </div>
 
-            </div>
+    ) : (
 
-        ) : (
+        <div className="empty-section">
 
-            <div className="empty-section">
+            <h4>
+                No Completed Surveys
+            </h4>
 
-                <h4>More Surveys Coming Soon</h4>
+            <p>
+                Once you complete surveys, they'll appear here for your records.
+            </p>
 
-                <p>
-                    New survey opportunities will appear here once they're published
-                    by the administrator.
-                </p>
+        </div>
 
-            </div>
+    )}
 
-        )}
+</div>
 
-    </div>
+
+{/* ================= COMING SOON ================= */}
+
+<div className="survey-category">
+
+    <h3 className="survey-group-title">
+        Coming Soon
+    </h3>
+
+    {comingSoonSurveys.length > 0 ? (
+
+        <div className="survey-grid">
+
+            {comingSoonSurveys.map((survey) => (
+
+                <SurveyCard
+                    key={survey.id}
+
+                    survey={survey}
+
+                    verified={verified}
+
+                    verificationStatus={
+                        verificationStatus
+                    }
+
+                    completed={false}
+
+                    available={false}
+
+                    comingSoon={true}
+                />
+
+            ))}
+
+        </div>
+
+    ) : (
+
+        <div className="empty-section">
+
+            <h4>
+                More Surveys Coming Soon
+            </h4>
+
+            <p>
+                New survey opportunities will appear here once they're
+                published by the administrator.
+            </p>
+
+        </div>
+
+    )}
+
+</div>
+
+
 
 </div>
         </div>

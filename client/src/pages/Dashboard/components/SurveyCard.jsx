@@ -6,9 +6,12 @@ export default function SurveyCard({
     survey,
     verified,
     verificationStatus,
+    available = false,
+    completed = false,
 }) {
 
     const navigate = useNavigate();
+
 
     /*
     |--------------------------------------------------------------------------
@@ -22,7 +25,9 @@ export default function SurveyCard({
 
             <div className="survey-card empty">
 
-                <h2>No Surveys Available</h2>
+                <h2>
+                    No Surveys Available
+                </h2>
 
                 <p>
                     New surveys will appear here once published.
@@ -34,21 +39,28 @@ export default function SurveyCard({
 
     }
 
+
     /*
     |--------------------------------------------------------------------------
-    | COMING SOON
+    | DETERMINE COMING SOON
     |--------------------------------------------------------------------------
     |
-    | A survey is Coming Soon when:
+    | IMPORTANT:
     |
-    | - Its status is not ACTIVE
-    | - OR preview is explicitly true
+    | An explicitly available survey must NOT be treated as Coming Soon,
+    | even if its database status is COMING_SOON.
+    |
+    | This allows an administrator to assign a specific survey to a user
+    | without changing the survey's global status.
     |
     */
 
     const isComingSoon =
-        survey.status !== "ACTIVE" ||
-        survey.preview === true;
+        !available &&
+        (
+            survey.status !== "ACTIVE" ||
+            survey.preview === true
+        );
 
 
     /*
@@ -59,10 +71,37 @@ export default function SurveyCard({
 
     function renderAction() {
 
+
+        /*
+        |----------------------------------------------------------------------
+        | COMPLETED
+        |----------------------------------------------------------------------
+        */
+
+        if (completed) {
+
+            return (
+
+                <button
+                    type="button"
+                    className="locked-btn"
+                    disabled
+                >
+                    ✓ Survey Completed
+                </button>
+
+            );
+
+        }
+
+
         /*
         |----------------------------------------------------------------------
         | COMING SOON
         |----------------------------------------------------------------------
+        |
+        | Only genuinely unavailable surveys reach this block.
+        |
         */
 
         if (isComingSoon) {
@@ -88,7 +127,9 @@ export default function SurveyCard({
         |----------------------------------------------------------------------
         */
 
-        if (verificationStatus === "NOT_SUBMITTED") {
+        if (
+            verificationStatus === "NOT_SUBMITTED"
+        ) {
 
             return (
 
@@ -111,7 +152,9 @@ export default function SurveyCard({
         |----------------------------------------------------------------------
         */
 
-        if (verificationStatus === "PENDING") {
+        if (
+            verificationStatus === "PENDING"
+        ) {
 
             return (
 
@@ -134,7 +177,9 @@ export default function SurveyCard({
         |----------------------------------------------------------------------
         */
 
-        if (verificationStatus === "REJECTED") {
+        if (
+            verificationStatus === "REJECTED"
+        ) {
 
             return (
 
@@ -176,8 +221,8 @@ export default function SurveyCard({
 
         /*
         |----------------------------------------------------------------------
-        | ACTIVE SURVEY
-        |----------------------------------------------------------------------
+        | AVAILABLE SURVEY
+        |--------------------------------------------------------------------------
         */
 
         return (
@@ -207,15 +252,16 @@ export default function SurveyCard({
 
         <div
             className={`survey-card ${
-                isComingSoon ? "coming-soon" : ""
+                isComingSoon
+                    ? "coming-soon"
+                    : ""
             }`}
         >
 
-            {/* 
-            |--------------------------------------------------------------------------
-            | HEADER
-            |--------------------------------------------------------------------------
-            */}
+
+            {/* -----------------------------------------------------------------
+                HEADER
+            ----------------------------------------------------------------- */}
 
             <div className="survey-header">
 
@@ -233,6 +279,7 @@ export default function SurveyCard({
 
                 </span>
 
+
                 <h2>
                     {survey.title}
                 </h2>
@@ -240,11 +287,9 @@ export default function SurveyCard({
             </div>
 
 
-            {/*
-            |--------------------------------------------------------------------------
-            | DESCRIPTION
-            |--------------------------------------------------------------------------
-            */}
+            {/* -----------------------------------------------------------------
+                DESCRIPTION
+            ----------------------------------------------------------------- */}
 
             {survey.description && (
 
@@ -259,13 +304,12 @@ export default function SurveyCard({
             )}
 
 
-            {/*
-            |--------------------------------------------------------------------------
-            | SURVEY DETAILS
-            |--------------------------------------------------------------------------
-            */}
+            {/* -----------------------------------------------------------------
+                SURVEY DETAILS
+            ----------------------------------------------------------------- */}
 
             <div className="survey-details">
+
 
                 <div>
 
@@ -305,14 +349,13 @@ export default function SurveyCard({
 
                 </div>
 
+
             </div>
 
 
-            {/*
-            |--------------------------------------------------------------------------
-            | COMING SOON MESSAGE
-            |--------------------------------------------------------------------------
-            */}
+            {/* -----------------------------------------------------------------
+                COMING SOON MESSAGE
+            ----------------------------------------------------------------- */}
 
             {isComingSoon && (
 
@@ -334,11 +377,9 @@ export default function SurveyCard({
             )}
 
 
-            {/*
-            |--------------------------------------------------------------------------
-            | ACTION
-            |--------------------------------------------------------------------------
-            */}
+            {/* -----------------------------------------------------------------
+                ACTION
+            ----------------------------------------------------------------- */}
 
             <div className="survey-action">
 
@@ -346,9 +387,12 @@ export default function SurveyCard({
 
             </div>
 
+
         </div>
 
     );
 
 }
+
+
 
