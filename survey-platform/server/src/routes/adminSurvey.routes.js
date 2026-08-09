@@ -4,15 +4,14 @@ import authMiddleware from "../middleware/auth.middleware.js";
 import adminMiddleware from "../middleware/admin.middleware.js";
 
 import {
-
     createSurvey,
     getAllSurveys,
     getSurvey,
     updateSurvey,
     deleteSurvey,
     activateSurvey,
+    setSurveyStatus,
     getSurveyDetails
-
 } from "../controllers/adminSurvey.controller.js";
 
 const router = Router();
@@ -24,15 +23,10 @@ const router = Router();
 */
 
 router.post(
-
     "/",
-
     authMiddleware,
-
     adminMiddleware,
-
     createSurvey
-
 );
 
 /*
@@ -42,15 +36,10 @@ router.post(
 */
 
 router.get(
-
     "/",
-
     authMiddleware,
-
     adminMiddleware,
-
     getAllSurveys
-
 );
 
 /*
@@ -60,15 +49,10 @@ router.get(
 */
 
 router.get(
-
     "/:id",
-
     authMiddleware,
-
     adminMiddleware,
-
     getSurvey
-
 );
 
 /*
@@ -78,15 +62,10 @@ router.get(
 */
 
 router.put(
-
     "/:id",
-
     authMiddleware,
-
     adminMiddleware,
-
     updateSurvey
-
 );
 
 /*
@@ -96,44 +75,63 @@ router.put(
 */
 
 router.delete(
-
     "/:id",
-
     authMiddleware,
-
     adminMiddleware,
-
     deleteSurvey
-
 );
 
 /*
 |--------------------------------------------------------------------------
 | ACTIVATE SURVEY
 |--------------------------------------------------------------------------
+|
+| This activates the selected survey and handles the
+| active-survey assignment logic.
+|
+|--------------------------------------------------------------------------
 */
 
 router.post(
-
     "/:id/activate",
-
     authMiddleware,
-
     adminMiddleware,
-
     activateSurvey
-
 );
-router.get(
 
-    "/:id/details",
+/*
+|--------------------------------------------------------------------------
+| SET SURVEY STATUS
+|--------------------------------------------------------------------------
+|
+| Allows admin to manually set:
+|
+| ACTIVE
+| COMING_SOON
+| LOCKED
+| CLOSED
+|
+|--------------------------------------------------------------------------
+*/
 
+router.patch(
+    "/:id/status",
     authMiddleware,
-
     adminMiddleware,
+    setSurveyStatus
+);
 
+/*
+|--------------------------------------------------------------------------
+| GET SURVEY DETAILS
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+    "/:id/details",
+    authMiddleware,
+    adminMiddleware,
     getSurveyDetails
-
 );
 
 export default router;
