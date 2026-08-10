@@ -27,6 +27,7 @@ import darajaRoutes from "./routes/daraja.routes.js";
 import withdrawalRoutes from "./routes/withdrawal.routes.js";
 import rewardAdminRoutes from "./routes/rewardAdmin.routes.js";
 import rewardRoutes from "./routes/reward.route.js";
+import adminEmailRoutes from "./routes/adminEmail.routes.js";
 
 const app = express();
 
@@ -118,6 +119,10 @@ app.use("/api/surveys", surveyRoutes);
 app.use("/api/daraja", darajaRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/reward", rewardRoutes);
+app.use(
+    "/api/admin/emails",
+    adminEmailRoutes
+);
 /*
 |--------------------------------------------------------------------------
 | Admin Routes

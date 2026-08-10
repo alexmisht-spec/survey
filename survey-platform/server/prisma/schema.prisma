@@ -19,6 +19,13 @@ enum AccountStatus {
   REJECTED
 }
 
+enum EmailTemplateType {
+  VERIFICATION_FOLLOWUP
+  HIGH_PAYING_SURVEY
+  WELCOME
+  GENERAL
+}
+
 enum VerificationStatus {
   PENDING
   APPROVED
@@ -124,6 +131,7 @@ model User {
   notifications    Notification[]
   passwordOtps     PasswordResetOTP[]
   rewardCredential RewardCredential?
+  emailLogs        EmailLog[]
 }
 
 /**
@@ -470,4 +478,45 @@ model RewardCredential {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailTemplate {
+  id String @id @default(cuid())
+
+  name        String
+  subject     String
+  htmlContent String
+
+  type EmailTemplateType?
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  logs EmailLog[]
+}
+
+model EmailLog {
+  id String @id @default(cuid())
+
+  userId     String
+  templateId String?
+
+  email   String
+  subject String
+
+  status       String
+  errorMessage String?
+
+  sentAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  template EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([templateId])
+  @@index([status])
+  @@index([sentAt])
 }

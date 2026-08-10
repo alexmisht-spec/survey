@@ -1,36 +1,73 @@
 import { useEffect, useState } from "react";
 import { getPendingVerifications } from "../../api/admin.api";
+import {
+    getUnverifiedUsers,
+    getEmailTemplates,
+    sendAdminEmail
+} from "../../api/admin.email";
+
 import UserDetailsModal from "./components/UserDetailsModal";
-import "./Users.css"
+import "./Users.css";
 
 export default function Users() {
 
     const [pendingVerifications, setPendingVerifications] = useState([]);
     const [unverifiedUsers, setUnverifiedUsers] = useState([]);
 
-    const [loading, setLoading] = useState(true);
+    const [emailUsers, setEmailUsers] = useState([]);
+    const [templates, setTemplates] = useState([]);
 
     const [selectedVerification, setSelectedVerification] = useState(null);
+
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedTemplate, setSelectedTemplate] = useState("");
+
+    const [loading, setLoading] = useState(true);
+    const [sending, setSending] = useState(false);
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOAD EVERYTHING
+    |--------------------------------------------------------------------------
+    */
 
     async function loadUsers() {
 
         try {
 
-            const { data } = await getPendingVerifications();
+            setLoading(true);
 
-            setPendingVerifications(data.pendingVerifications || []);
+            const [
+                verificationRes,
+                usersRes,
+                templateRes
+            ] = await Promise.all([
+                getPendingVerifications(),
+                getUnverifiedUsers(),
+                getEmailTemplates()
+            ]);
 
-            setUnverifiedUsers(data.unverifiedUsers || []);
+            setPendingVerifications(
+                verificationRes.data.pendingVerifications || []
+            );
 
-        }
+            setUnverifiedUsers(
+                verificationRes.data.unverifiedUsers || []
+            );
 
-        catch (error) {
+            setEmailUsers(
+                usersRes.data.users || []
+            );
+
+            setTemplates(
+                templateRes.data.templates || []
+            );
+
+        } catch (error) {
 
             console.error(error);
 
-        }
-
-        finally {
+        } finally {
 
             setLoading(false);
 
@@ -44,6 +81,61 @@ export default function Users() {
 
     }, []);
 
+    /*
+    |--------------------------------------------------------------------------
+    | SEND FOLLOW-UP EMAIL
+    |--------------------------------------------------------------------------
+    */
+
+    async function handleSendEmail() {
+
+        if (!selectedUser) {
+
+            return alert("Select a user first.");
+
+        }
+
+        if (!selectedTemplate) {
+
+            return alert("Select an email template.");
+
+        }
+
+        const confirmed = window.confirm(
+            `Send this email to ${selectedUser.email}?`
+        );
+
+        if (!confirmed) return;
+
+        try {
+
+            setSending(true);
+
+            const { data } = await sendAdminEmail({
+
+                userId: selectedUser.id,
+
+                templateId: selectedTemplate
+
+            });
+
+            alert(data.message);
+
+        } catch (error) {
+
+            alert(
+                error.response?.data?.message ||
+                "Failed to send email."
+            );
+
+        } finally {
+
+            setSending(false);
+
+        }
+
+    }
+
     if (loading) {
 
         return <h2>Loading...</h2>;
@@ -56,7 +148,9 @@ export default function Users() {
 
             <h1>User Verification Management</h1>
 
-            {/* Pending Verification */}
+            {/* ==========================================================
+                PENDING VERIFICATIONS
+            ========================================================== */}
 
             <div className="admin-section">
 
@@ -118,17 +212,11 @@ export default function Users() {
                                     <td>
 
                                         <button
-
                                             onClick={() =>
-
                                                 setSelectedVerification(item.id)
-
                                             }
-
                                         >
-
                                             Review
-
                                         </button>
 
                                     </td>
@@ -145,7 +233,9 @@ export default function Users() {
 
             </div>
 
-            {/* Users Without Verification */}
+            {/* ==========================================================
+                USERS WITHOUT DOCUMENTS
+            ========================================================== */}
 
             <div className="admin-section">
 
@@ -163,7 +253,7 @@ export default function Users() {
 
                             <th>Phone</th>
 
-                            <th>Account Status</th>
+                            <th>Status</th>
 
                         </tr>
 
@@ -222,20 +312,143 @@ export default function Users() {
 
             </div>
 
+            {/* ==========================================================
+                EMAIL FOLLOW-UP
+            ========================================================== */}
+
+            <div className="admin-section">
+
+                <h2>Follow-up Email Campaign</h2>
+
+                <p className="section-description">
+
+                    Recover users who registered but never completed verification.
+
+                </p>
+
+                <div className="email-grid">
+
+                    {/* USERS */}
+
+                    <div className="email-card">
+
+                        <h3>Select User</h3>
+
+                        <div className="user-list">
+
+                            {emailUsers.map((user) => (
+
+                                <div
+                                    key={user.id}
+                                    className={
+                                        selectedUser?.id === user.id
+                                            ? "user-item active"
+                                            : "user-item"
+                                    }
+                                    onClick={() => setSelectedUser(user)}
+                                >
+
+                                    <strong>
+
+                                        {user.firstName} {user.lastName}
+
+                                    </strong>
+
+                                    <span>{user.email}</span>
+
+                                    <small>{user.status}</small>
+
+                                </div>
+
+                            ))}
+
+                        </div>
+
+                    </div>
+
+                    {/* TEMPLATE */}
+
+                    <div className="email-card">
+
+                        <h3>Email Template</h3>
+
+                        <select
+                            value={selectedTemplate}
+                            onChange={(e) =>
+                                setSelectedTemplate(e.target.value)
+                            }
+                        >
+
+                            <option value="">
+
+                                Select Template
+
+                            </option>
+
+                            {templates.map((template) => (
+
+                                <option
+                                    key={template.id}
+                                    value={template.id}
+                                >
+
+                                    {template.name}
+
+                                </option>
+
+                            ))}
+
+                        </select>
+
+                        {selectedUser && (
+                            <div className="recipient-box">
+
+                                <h4>Recipient</h4>
+
+                                <p>
+
+                                    <strong>
+                                        {selectedUser.firstName}{" "}
+                                        {selectedUser.lastName}
+                                    </strong>
+
+                                </p>
+
+                                <p>{selectedUser.email}</p>
+
+                            </div>
+                        )}
+
+                        <button
+                            className="send-email-btn"
+                            disabled={
+                                sending ||
+                                !selectedUser ||
+                                !selectedTemplate
+                            }
+                            onClick={handleSendEmail}
+                        >
+
+                            {sending
+                                ? "Sending..."
+                                : "Send Follow-up Email"}
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
             {selectedVerification && (
 
                 <UserDetailsModal
-
                     verificationId={selectedVerification}
-
                     onClose={() =>
-
                         setSelectedVerification(null)
-
                     }
-
                     refresh={loadUsers}
-
                 />
 
             )}
