@@ -1,5 +1,5 @@
 import axios from "axios";
-import prisma from "../src/config/prisma";
+import prisma from "../src/config/prisma.js";
 
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
