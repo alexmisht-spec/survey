@@ -120,7 +120,7 @@ app.use("/api/daraja", darajaRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/reward", rewardRoutes);
 app.use(
-    "/api/admin/emails",
+    "/api/admin/email",
     adminEmailRoutes
 );
 /*
