@@ -14,7 +14,7 @@ export const getUnverifiedUsers = async (req, res) => {
 
         const users = await prisma.user.findMany({
 
-            where: {
+            where: {  
 
                 status: {
                     in: [
