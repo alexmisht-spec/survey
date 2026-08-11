@@ -31,49 +31,139 @@ export default function Users() {
     |--------------------------------------------------------------------------
     */
 
-    async function loadUsers() {
+async function loadUsers() {
 
-        try {
+    try {
 
-            setLoading(true);
+        setLoading(true);
 
-            const [
-                verificationRes,
-                usersRes,
-                templateRes
-            ] = await Promise.all([
-                getPendingVerifications(),
-                getUnverifiedUsers(),
-                getEmailTemplates()
-            ]);
+        /*
+        |--------------------------------------------------------------------------
+        | LOAD ALL DATA INDEPENDENTLY
+        |--------------------------------------------------------------------------
+        |
+        | A failure in email templates must NOT prevent the verification
+        | and user lists from loading.
+        |
+        */
+
+        const [
+            verificationResult,
+            usersResult,
+            templatesResult
+        ] = await Promise.allSettled([
+
+            getPendingVerifications(),
+
+            getUnverifiedUsers(),
+
+            getEmailTemplates()
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENDING VERIFICATIONS + USERS WITHOUT DOCUMENTS
+        |--------------------------------------------------------------------------
+        */
+
+        if (verificationResult.status === "fulfilled") {
+
+            const data = verificationResult.value.data;
 
             setPendingVerifications(
-                verificationRes.data.pendingVerifications || []
+                data.pendingVerifications || []
             );
 
             setUnverifiedUsers(
-                verificationRes.data.unverifiedUsers || []
+                data.unverifiedUsers || []
             );
 
-            setEmailUsers(
-                usersRes.data.users || []
+        } else {
+
+            console.error(
+                "Failed to load verification data:",
+                verificationResult.reason
             );
 
-            setTemplates(
-                templateRes.data.templates || []
-            );
+            setPendingVerifications([]);
 
-        } catch (error) {
-
-            console.error(error);
-
-        } finally {
-
-            setLoading(false);
+            setUnverifiedUsers([]);
 
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | EMAIL CAMPAIGN USERS
+        |--------------------------------------------------------------------------
+        */
+
+        if (usersResult.status === "fulfilled") {
+
+            const data = usersResult.value.data;
+
+            setEmailUsers(
+                data.users || []
+            );
+
+        } else {
+
+            console.error(
+                "Failed to load email users:",
+                usersResult.reason
+            );
+
+            setEmailUsers([]);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | EMAIL TEMPLATES
+        |--------------------------------------------------------------------------
+        |
+        | If this request returns 500, the rest of the page still works.
+        |
+        */
+
+        if (templatesResult.status === "fulfilled") {
+
+            const data = templatesResult.value.data;
+
+            setTemplates(
+                data.templates || []
+            );
+
+        } else {
+
+            console.error(
+                "Failed to load email templates:",
+                templatesResult.reason
+            );
+
+            setTemplates([]);
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "LOAD USERS ERROR:",
+            error
+        );
+
+    } finally {
+
+        setLoading(false);
+
     }
+
+}
+
+
 
     useEffect(() => {
 
