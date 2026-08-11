@@ -108,29 +108,30 @@ export const getEmailTemplates = async (req, res) => {
 
     try {
 
-        const templates =
-            await prisma.emailTemplate.findMany({
+        console.log("GET EMAIL TEMPLATES: starting...");
 
-                where: {
+        const templates = await prisma.emailTemplate.findMany({
 
-                    active: true
+            where: {
+                active: true
+            },
 
-                },
+            orderBy: {
+                createdAt: "desc"
+            }
 
-                orderBy: {
+        });
 
-                    createdAt: "desc"
+        console.log(
+            "GET EMAIL TEMPLATES: found",
+            templates.length,
+            "templates"
+        );
 
-                }
-
-            });
-
-        return res.json({
+        return res.status(200).json({
 
             success: true,
-
             total: templates.length,
-
             templates
 
         });
@@ -138,15 +139,46 @@ export const getEmailTemplates = async (req, res) => {
     } catch (error) {
 
         console.error(
-            "GET EMAIL TEMPLATES ERROR:",
-            error
+            "=========================================="
+        );
+
+        console.error(
+            "GET EMAIL TEMPLATES ERROR"
+        );
+
+        console.error(
+            "MESSAGE:",
+            error.message
+        );
+
+        console.error(
+            "CODE:",
+            error.code
+        );
+
+        console.error(
+            "META:",
+            error.meta
+        );
+
+        console.error(
+            "STACK:",
+            error.stack
+        );
+
+        console.error(
+            "=========================================="
         );
 
         return res.status(500).json({
 
             success: false,
 
-            message: "Failed to load email templates."
+            message: "Failed to load email templates.",
+
+            error: error.message,
+
+            code: error.code || null
 
         });
 
