@@ -4,8 +4,91 @@ import { sendBrevoEmail } from "../../services/brevo.service.js";
 
 /*
 |--------------------------------------------------------------------------
+| GET USERS FOR EMAIL CAMPAIGNS
+|--------------------------------------------------------------------------
+|
+| Returns ALL users so admins can email:
+|
+| - VERIFIED users
+| - REGISTERED users
+| - PENDING_VERIFICATION users
+| - REJECTED users
+| - Any other user account status
+|
+*/
+
+export const getEmailUsers = async (req, res) => {
+
+    try {
+
+        const users = await prisma.user.findMany({
+
+            select: {
+
+                id: true,
+
+                firstName: true,
+
+                lastName: true,
+
+                email: true,
+
+                phone: true,
+
+                status: true,
+
+                createdAt: true
+
+            },
+
+            orderBy: {
+
+                createdAt: "desc"
+
+            }
+
+        });
+
+        return res.status(200).json({
+
+            success: true,
+
+            total: users.length,
+
+            users
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "GET EMAIL USERS ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: "Failed to load users for email campaign.",
+
+            error: error.message
+
+        });
+
+    }
+
+};
+
+
+/*
+|--------------------------------------------------------------------------
 | GET UNVERIFIED USERS
 |--------------------------------------------------------------------------
+|
+| This endpoint remains separate from the email campaign users.
+| It is used for verification/document follow-up.
+|
 */
 
 export const getUnverifiedUsers = async (req, res) => {
@@ -14,14 +97,20 @@ export const getUnverifiedUsers = async (req, res) => {
 
         const users = await prisma.user.findMany({
 
-            where: {  
+            where: {
 
                 status: {
+
                     in: [
+
                         "REGISTERED",
+
                         "PENDING_VERIFICATION",
+
                         "REJECTED"
+
                     ]
+
                 }
 
             },
@@ -68,7 +157,7 @@ export const getUnverifiedUsers = async (req, res) => {
 
         });
 
-        return res.json({
+        return res.status(200).json({
 
             success: true,
 
@@ -89,7 +178,9 @@ export const getUnverifiedUsers = async (req, res) => {
 
             success: false,
 
-            message: "Failed to load unverified users."
+            message: "Failed to load unverified users.",
+
+            error: error.message
 
         });
 
@@ -108,19 +199,28 @@ export const getEmailTemplates = async (req, res) => {
 
     try {
 
-        console.log("GET EMAIL TEMPLATES: starting...");
+        console.log(
+            "GET EMAIL TEMPLATES: starting..."
+        );
 
-        const templates = await prisma.emailTemplate.findMany({
 
-            where: {
-                active: true
-            },
+        const templates =
+            await prisma.emailTemplate.findMany({
 
-            orderBy: {
-                createdAt: "desc"
-            }
+                where: {
 
-        });
+                    active: true
+
+                },
+
+                orderBy: {
+
+                    createdAt: "desc"
+
+                }
+
+            });
+
 
         console.log(
             "GET EMAIL TEMPLATES: found",
@@ -128,10 +228,13 @@ export const getEmailTemplates = async (req, res) => {
             "templates"
         );
 
+
         return res.status(200).json({
 
             success: true,
+
             total: templates.length,
+
             templates
 
         });
@@ -170,6 +273,7 @@ export const getEmailTemplates = async (req, res) => {
             "=========================================="
         );
 
+
         return res.status(500).json({
 
             success: false,
@@ -198,10 +302,15 @@ export const createEmailTemplate = async (req, res) => {
     try {
 
         const {
+
             name,
+
             subject,
+
             htmlContent,
+
             type
+
         } = req.body;
 
 
@@ -211,7 +320,11 @@ export const createEmailTemplate = async (req, res) => {
         |--------------------------------------------------------------------------
         */
 
-        if (!name || !name.trim()) {
+        if (
+            !name ||
+            typeof name !== "string" ||
+            !name.trim()
+        ) {
 
             return res.status(400).json({
 
@@ -223,7 +336,12 @@ export const createEmailTemplate = async (req, res) => {
 
         }
 
-        if (!subject || !subject.trim()) {
+
+        if (
+            !subject ||
+            typeof subject !== "string" ||
+            !subject.trim()
+        ) {
 
             return res.status(400).json({
 
@@ -235,7 +353,12 @@ export const createEmailTemplate = async (req, res) => {
 
         }
 
-        if (!htmlContent || !htmlContent.trim()) {
+
+        if (
+            !htmlContent ||
+            typeof htmlContent !== "string" ||
+            !htmlContent.trim()
+        ) {
 
             return res.status(400).json({
 
@@ -266,7 +389,11 @@ export const createEmailTemplate = async (req, res) => {
 
         ];
 
-        if (type && !allowedTypes.includes(type)) {
+
+        if (
+            type &&
+            !allowedTypes.includes(type)
+        ) {
 
             return res.status(400).json({
 
@@ -322,11 +449,14 @@ export const createEmailTemplate = async (req, res) => {
             error
         );
 
+
         return res.status(500).json({
 
             success: false,
 
-            message: "Failed to create email template."
+            message: "Failed to create email template.",
+
+            error: error.message
 
         });
 
@@ -347,12 +477,19 @@ export const updateEmailTemplate = async (req, res) => {
 
         const { id } = req.params;
 
+
         const {
+
             name,
+
             subject,
+
             htmlContent,
+
             type,
+
             active
+
         } = req.body;
 
 
@@ -373,6 +510,7 @@ export const updateEmailTemplate = async (req, res) => {
 
             });
 
+
         if (!existingTemplate) {
 
             return res.status(404).json({
@@ -388,7 +526,7 @@ export const updateEmailTemplate = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | VALIDATE TYPE
+        | VALIDATE TEMPLATE TYPE
         |--------------------------------------------------------------------------
         */
 
@@ -404,7 +542,11 @@ export const updateEmailTemplate = async (req, res) => {
 
         ];
 
-        if (type && !allowedTypes.includes(type)) {
+
+        if (
+            type &&
+            !allowedTypes.includes(type)
+        ) {
 
             return res.status(400).json({
 
@@ -428,7 +570,10 @@ export const updateEmailTemplate = async (req, res) => {
 
         if (name !== undefined) {
 
-            if (!name.trim()) {
+            if (
+                typeof name !== "string" ||
+                !name.trim()
+            ) {
 
                 return res.status(400).json({
 
@@ -447,7 +592,10 @@ export const updateEmailTemplate = async (req, res) => {
 
         if (subject !== undefined) {
 
-            if (!subject.trim()) {
+            if (
+                typeof subject !== "string" ||
+                !subject.trim()
+            ) {
 
                 return res.status(400).json({
 
@@ -466,7 +614,10 @@ export const updateEmailTemplate = async (req, res) => {
 
         if (htmlContent !== undefined) {
 
-            if (!htmlContent.trim()) {
+            if (
+                typeof htmlContent !== "string" ||
+                !htmlContent.trim()
+            ) {
 
                 return res.status(400).json({
 
@@ -499,7 +650,7 @@ export const updateEmailTemplate = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | UPDATE
+        | UPDATE TEMPLATE
         |--------------------------------------------------------------------------
         */
 
@@ -517,7 +668,7 @@ export const updateEmailTemplate = async (req, res) => {
             });
 
 
-        return res.json({
+        return res.status(200).json({
 
             success: true,
 
@@ -534,11 +685,14 @@ export const updateEmailTemplate = async (req, res) => {
             error
         );
 
+
         return res.status(500).json({
 
             success: false,
 
-            message: "Failed to update email template."
+            message: "Failed to update email template.",
+
+            error: error.message
 
         });
 
@@ -552,7 +706,7 @@ export const updateEmailTemplate = async (req, res) => {
 | DELETE EMAIL TEMPLATE
 |--------------------------------------------------------------------------
 |
-| We deactivate rather than physically deleting the template because
+| We deactivate the template rather than physically deleting it because
 | EmailLog records may still reference it.
 |
 */
@@ -564,6 +718,12 @@ export const deleteEmailTemplate = async (req, res) => {
         const { id } = req.params;
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK TEMPLATE
+        |--------------------------------------------------------------------------
+        */
+
         const template =
             await prisma.emailTemplate.findUnique({
 
@@ -574,6 +734,7 @@ export const deleteEmailTemplate = async (req, res) => {
                 }
 
             });
+
 
         if (!template) {
 
@@ -587,6 +748,12 @@ export const deleteEmailTemplate = async (req, res) => {
 
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEACTIVATE
+        |--------------------------------------------------------------------------
+        */
 
         await prisma.emailTemplate.update({
 
@@ -605,7 +772,7 @@ export const deleteEmailTemplate = async (req, res) => {
         });
 
 
-        return res.json({
+        return res.status(200).json({
 
             success: true,
 
@@ -620,11 +787,14 @@ export const deleteEmailTemplate = async (req, res) => {
             error
         );
 
+
         return res.status(500).json({
 
             success: false,
 
-            message: "Failed to delete email template."
+            message: "Failed to delete email template.",
+
+            error: error.message
 
         });
 
@@ -637,6 +807,9 @@ export const deleteEmailTemplate = async (req, res) => {
 |--------------------------------------------------------------------------
 | SEND EMAIL TO USER
 |--------------------------------------------------------------------------
+|
+| Admin can send emails to ANY user regardless of account status.
+|
 */
 
 export const sendAdminEmail = async (req, res) => {
@@ -644,10 +817,19 @@ export const sendAdminEmail = async (req, res) => {
     try {
 
         const {
+
             userId,
+
             templateId
+
         } = req.body;
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATION
+        |--------------------------------------------------------------------------
+        */
 
         if (!userId) {
 
@@ -692,6 +874,7 @@ export const sendAdminEmail = async (req, res) => {
 
             });
 
+
         if (!user) {
 
             return res.status(404).json({
@@ -707,28 +890,22 @@ export const sendAdminEmail = async (req, res) => {
 
         /*
         |--------------------------------------------------------------------------
-        | ONLY UNVERIFIED USERS
+        | CHECK EMAIL ADDRESS
         |--------------------------------------------------------------------------
         */
 
-        const allowedStatuses = [
-
-            "REGISTERED",
-
-            "PENDING_VERIFICATION",
-
-            "REJECTED"
-
-        ];
-
-        if (!allowedStatuses.includes(user.status)) {
+        if (
+            !user.email ||
+            typeof user.email !== "string" ||
+            !user.email.trim()
+        ) {
 
             return res.status(400).json({
 
                 success: false,
 
                 message:
-                    "This email can only be sent to unverified users."
+                    "This user does not have a valid email address."
 
             });
 
@@ -752,6 +929,7 @@ export const sendAdminEmail = async (req, res) => {
 
             });
 
+
         if (!template) {
 
             return res.status(404).json({
@@ -764,6 +942,12 @@ export const sendAdminEmail = async (req, res) => {
 
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK TEMPLATE STATUS
+        |--------------------------------------------------------------------------
+        */
 
         if (!template.active) {
 
@@ -785,11 +969,13 @@ export const sendAdminEmail = async (req, res) => {
         */
 
         const fullName =
-            `${user.firstName || ""} ${user.lastName || ""}`.trim();
+            `${user.firstName || ""} ${user.lastName || ""}`
+                .trim();
 
 
         let htmlContent =
             template.htmlContent;
+
 
         htmlContent = htmlContent
 
@@ -817,6 +1003,7 @@ export const sendAdminEmail = async (req, res) => {
         let subject =
             template.subject;
 
+
         subject = subject
 
             .replaceAll(
@@ -832,6 +1019,11 @@ export const sendAdminEmail = async (req, res) => {
             .replaceAll(
                 "{{fullName}}",
                 fullName
+            )
+
+            .replaceAll(
+                "{{email}}",
+                user.email || ""
             );
 
 
@@ -845,7 +1037,7 @@ export const sendAdminEmail = async (req, res) => {
 
             await sendBrevoEmail({
 
-                to: user.email,
+                to: user.email.trim(),
 
                 subject,
 
@@ -869,7 +1061,7 @@ export const sendAdminEmail = async (req, res) => {
 
                         templateId: template.id,
 
-                        email: user.email,
+                        email: user.email.trim(),
 
                         subject,
 
@@ -880,7 +1072,7 @@ export const sendAdminEmail = async (req, res) => {
                 });
 
 
-            return res.json({
+            return res.status(200).json({
 
                 success: true,
 
@@ -899,28 +1091,45 @@ export const sendAdminEmail = async (req, res) => {
             );
 
 
-            await prisma.emailLog.create({
+            /*
+            |--------------------------------------------------------------------------
+            | LOG FAILED EMAIL
+            |--------------------------------------------------------------------------
+            */
 
-                data: {
+            try {
 
-                    userId: user.id,
+                await prisma.emailLog.create({
 
-                    templateId: template.id,
+                    data: {
 
-                    email: user.email,
+                        userId: user.id,
 
-                    subject,
+                        templateId: template.id,
 
-                    status: "FAILED",
+                        email: user.email.trim(),
 
-                    errorMessage:
-                        brevoError.response?.data?.message ||
-                        brevoError.message ||
-                        "Brevo email failed."
+                        subject,
 
-                }
+                        status: "FAILED",
 
-            });
+                        errorMessage:
+                            brevoError.response?.data?.message ||
+                            brevoError.message ||
+                            "Brevo email failed."
+
+                    }
+
+                });
+
+            } catch (logError) {
+
+                console.error(
+                    "EMAIL LOG ERROR:",
+                    logError
+                );
+
+            }
 
 
             return res.status(502).json({
@@ -931,7 +1140,8 @@ export const sendAdminEmail = async (req, res) => {
 
                 error:
                     brevoError.response?.data?.message ||
-                    brevoError.message
+                    brevoError.message ||
+                    "Brevo email failed."
 
             });
 
@@ -944,11 +1154,14 @@ export const sendAdminEmail = async (req, res) => {
             error
         );
 
+
         return res.status(500).json({
 
             success: false,
 
-            message: "Failed to send email."
+            message: "Failed to send email.",
+
+            error: error.message
 
         });
 

@@ -1,169 +1,191 @@
 import { useEffect, useState } from "react";
+
 import { getPendingVerifications } from "../../api/admin.api";
+
 import {
-    getUnverifiedUsers,
+    getEmailUsers,
     getEmailTemplates,
     sendAdminEmail
 } from "../../api/admin.email";
 
 import UserDetailsModal from "./components/UserDetailsModal";
+
 import "./Users.css";
+
 
 export default function Users() {
 
     const [pendingVerifications, setPendingVerifications] = useState([]);
+
     const [unverifiedUsers, setUnverifiedUsers] = useState([]);
 
     const [emailUsers, setEmailUsers] = useState([]);
+
     const [templates, setTemplates] = useState([]);
 
     const [selectedVerification, setSelectedVerification] = useState(null);
 
     const [selectedUser, setSelectedUser] = useState(null);
+
     const [selectedTemplate, setSelectedTemplate] = useState("");
 
     const [loading, setLoading] = useState(true);
+
     const [sending, setSending] = useState(false);
+
 
     /*
     |--------------------------------------------------------------------------
-    | LOAD EVERYTHING
+    | LOAD USERS / VERIFICATIONS / EMAIL DATA
     |--------------------------------------------------------------------------
     */
 
-async function loadUsers() {
+    async function loadUsers() {
 
-    try {
+        try {
 
-        setLoading(true);
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD ALL DATA INDEPENDENTLY
-        |--------------------------------------------------------------------------
-        |
-        | A failure in email templates must NOT prevent the verification
-        | and user lists from loading.
-        |
-        */
-
-        const [
-            verificationResult,
-            usersResult,
-            templatesResult
-        ] = await Promise.allSettled([
-
-            getPendingVerifications(),
-
-            getUnverifiedUsers(),
-
-            getEmailTemplates()
-
-        ]);
+            setLoading(true);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | PENDING VERIFICATIONS + USERS WITHOUT DOCUMENTS
-        |--------------------------------------------------------------------------
-        */
+            const [
+                verificationResult,
+                emailUsersResult,
+                templatesResult
+            ] = await Promise.allSettled([
 
-        if (verificationResult.status === "fulfilled") {
+                getPendingVerifications(),
 
-            const data = verificationResult.value.data;
+                getEmailUsers(),
 
-            setPendingVerifications(
-                data.pendingVerifications || []
-            );
+                getEmailTemplates()
 
-            setUnverifiedUsers(
-                data.unverifiedUsers || []
-            );
+            ]);
 
-        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | VERIFICATION DATA
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                verificationResult.status === "fulfilled"
+            ) {
+
+                const data =
+                    verificationResult.value?.data || {};
+
+
+                setPendingVerifications(
+                    data.pendingVerifications || []
+                );
+
+
+                setUnverifiedUsers(
+                    data.unverifiedUsers || []
+                );
+
+            } else {
+
+                console.error(
+                    "Failed to load verification data:",
+                    verificationResult.reason
+                );
+
+
+                setPendingVerifications([]);
+
+                setUnverifiedUsers([]);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ALL USERS FOR EMAIL CAMPAIGNS
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                emailUsersResult.status === "fulfilled"
+            ) {
+
+                const data =
+                    emailUsersResult.value?.data || {};
+
+
+                setEmailUsers(
+                    Array.isArray(data.users)
+                        ? data.users
+                        : []
+                );
+
+            } else {
+
+                console.error(
+                    "Failed to load email users:",
+                    emailUsersResult.reason
+                );
+
+
+                setEmailUsers([]);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EMAIL TEMPLATES
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                templatesResult.status === "fulfilled"
+            ) {
+
+                const data =
+                    templatesResult.value?.data || {};
+
+
+                setTemplates(
+                    Array.isArray(data.templates)
+                        ? data.templates
+                        : []
+                );
+
+            } else {
+
+                console.error(
+                    "Failed to load email templates:",
+                    templatesResult.reason
+                );
+
+
+                setTemplates([]);
+
+            }
+
+        } catch (error) {
 
             console.error(
-                "Failed to load verification data:",
-                verificationResult.reason
+                "LOAD USERS ERROR:",
+                error
             );
 
-            setPendingVerifications([]);
+        } finally {
 
-            setUnverifiedUsers([]);
+            setLoading(false);
 
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | EMAIL CAMPAIGN USERS
-        |--------------------------------------------------------------------------
-        */
-
-        if (usersResult.status === "fulfilled") {
-
-            const data = usersResult.value.data;
-
-            setEmailUsers(
-                data.users || []
-            );
-
-        } else {
-
-            console.error(
-                "Failed to load email users:",
-                usersResult.reason
-            );
-
-            setEmailUsers([]);
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | EMAIL TEMPLATES
-        |--------------------------------------------------------------------------
-        |
-        | If this request returns 500, the rest of the page still works.
-        |
-        */
-
-        if (templatesResult.status === "fulfilled") {
-
-            const data = templatesResult.value.data;
-
-            setTemplates(
-                data.templates || []
-            );
-
-        } else {
-
-            console.error(
-                "Failed to load email templates:",
-                templatesResult.reason
-            );
-
-            setTemplates([]);
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "LOAD USERS ERROR:",
-            error
-        );
-
-    } finally {
-
-        setLoading(false);
 
     }
 
-}
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | INITIAL LOAD
+    |--------------------------------------------------------------------------
+    */
 
     useEffect(() => {
 
@@ -171,9 +193,10 @@ async function loadUsers() {
 
     }, []);
 
+
     /*
     |--------------------------------------------------------------------------
-    | SEND FOLLOW-UP EMAIL
+    | SEND EMAIL
     |--------------------------------------------------------------------------
     */
 
@@ -181,37 +204,74 @@ async function loadUsers() {
 
         if (!selectedUser) {
 
-            return alert("Select a user first.");
+            alert("Select a user first.");
+
+            return;
 
         }
+
 
         if (!selectedTemplate) {
 
-            return alert("Select an email template.");
+            alert("Select an email template.");
+
+            return;
 
         }
 
-        const confirmed = window.confirm(
-            `Send this email to ${selectedUser.email}?`
-        );
 
-        if (!confirmed) return;
+        if (!selectedUser.email) {
+
+            alert(
+                "This user does not have a valid email address."
+            );
+
+            return;
+
+        }
+
+
+        const confirmed =
+            window.confirm(
+                `Send this email to ${selectedUser.email}?`
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
 
         try {
 
             setSending(true);
 
-            const { data } = await sendAdminEmail({
 
-                userId: selectedUser.id,
+            const response =
+                await sendAdminEmail({
 
-                templateId: selectedTemplate
+                    userId: selectedUser.id,
 
-            });
+                    templateId: selectedTemplate
 
-            alert(data.message);
+                });
+
+
+            alert(
+                response?.data?.message ||
+                "Email sent successfully."
+            );
+
 
         } catch (error) {
+
+            console.error(
+                "SEND EMAIL ERROR:",
+                error
+            );
+
 
             alert(
                 error.response?.data?.message ||
@@ -226,17 +286,40 @@ async function loadUsers() {
 
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOADING
+    |--------------------------------------------------------------------------
+    */
+
     if (loading) {
 
-        return <h2>Loading...</h2>;
+        return (
+
+            <div className="admin-page">
+
+                <h2>Loading...</h2>
+
+            </div>
+
+        );
 
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RENDER
+    |--------------------------------------------------------------------------
+    */
 
     return (
 
         <div className="admin-page">
 
             <h1>User Verification Management</h1>
+
 
             {/* ==========================================================
                 PENDING VERIFICATIONS
@@ -245,6 +328,7 @@ async function loadUsers() {
             <div className="admin-section">
 
                 <h2>Pending Verification Requests</h2>
+
 
                 <table className="admin-table">
 
@@ -265,6 +349,7 @@ async function loadUsers() {
                         </tr>
 
                     </thead>
+
 
                     <tbody>
 
@@ -288,25 +373,46 @@ async function loadUsers() {
 
                                     <td>
 
-                                        {item.user.firstName}{" "}
-                                        {item.user.lastName}
+                                        {item.user?.firstName || ""}{" "}
+
+                                        {item.user?.lastName || ""}
 
                                     </td>
 
-                                    <td>{item.user.email}</td>
 
-                                    <td>{item.user.phone}</td>
+                                    <td>
 
-                                    <td>{item.status}</td>
+                                        {item.user?.email || "-"}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {item.user?.phone || "-"}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {item.status || "-"}
+
+                                    </td>
+
 
                                     <td>
 
                                         <button
                                             onClick={() =>
-                                                setSelectedVerification(item.id)
+                                                setSelectedVerification(
+                                                    item.id
+                                                )
                                             }
                                         >
+
                                             Review
+
                                         </button>
 
                                     </td>
@@ -323,6 +429,7 @@ async function loadUsers() {
 
             </div>
 
+
             {/* ==========================================================
                 USERS WITHOUT DOCUMENTS
             ========================================================== */}
@@ -330,6 +437,7 @@ async function loadUsers() {
             <div className="admin-section">
 
                 <h2>Users Yet To Upload Documents</h2>
+
 
                 <table className="admin-table">
 
@@ -348,6 +456,7 @@ async function loadUsers() {
                         </tr>
 
                     </thead>
+
 
                     <tbody>
 
@@ -371,14 +480,26 @@ async function loadUsers() {
 
                                     <td>
 
-                                        {user.firstName}{" "}
-                                        {user.lastName}
+                                        {user.firstName || ""}{" "}
+
+                                        {user.lastName || ""}
 
                                     </td>
 
-                                    <td>{user.email}</td>
 
-                                    <td>{user.phone}</td>
+                                    <td>
+
+                                        {user.email || "-"}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {user.phone || "-"}
+
+                                    </td>
+
 
                                     <td>
 
@@ -402,70 +523,129 @@ async function loadUsers() {
 
             </div>
 
+
             {/* ==========================================================
-                EMAIL FOLLOW-UP
+                EMAIL CAMPAIGN
             ========================================================== */}
 
             <div className="admin-section">
 
-                <h2>Follow-up Email Campaign</h2>
+                <h2>Email Campaign</h2>
+
 
                 <p className="section-description">
 
-                    Recover users who registered but never completed verification.
+                    Select any registered user and send them an email
+                    using an active email template.
 
                 </p>
 
+
                 <div className="email-grid">
 
-                    {/* USERS */}
+
+                    {/* ======================================================
+                        ALL USERS
+                    ====================================================== */}
 
                     <div className="email-card">
 
-                        <h3>Select User</h3>
+                        <h3>
+
+                            Select User
+
+                        </h3>
+
+
+                        <p>
+
+                            {emailUsers.length} user
+                            {emailUsers.length === 1 ? "" : "s"} available
+
+                        </p>
+
 
                         <div className="user-list">
 
-                            {emailUsers.map((user) => (
+                            {emailUsers.length === 0 ? (
 
-                                <div
-                                    key={user.id}
-                                    className={
-                                        selectedUser?.id === user.id
-                                            ? "user-item active"
-                                            : "user-item"
-                                    }
-                                    onClick={() => setSelectedUser(user)}
-                                >
+                                <p>
 
-                                    <strong>
+                                    No users available.
 
-                                        {user.firstName} {user.lastName}
+                                </p>
 
-                                    </strong>
+                            ) : (
 
-                                    <span>{user.email}</span>
+                                emailUsers.map((user) => (
 
-                                    <small>{user.status}</small>
+                                    <div
+                                        key={user.id}
 
-                                </div>
+                                        className={
+                                            selectedUser?.id === user.id
+                                                ? "user-item active"
+                                                : "user-item"
+                                        }
 
-                            ))}
+                                        onClick={() =>
+                                            setSelectedUser(user)
+                                        }
+                                    >
+
+                                        <strong>
+
+                                            {user.firstName || ""}{" "}
+
+                                            {user.lastName || ""}
+
+                                        </strong>
+
+
+                                        <span>
+
+                                            {user.email}
+
+                                        </span>
+
+
+                                        <small>
+
+                                            {user.status}
+
+                                        </small>
+
+                                    </div>
+
+                                ))
+
+                            )}
 
                         </div>
 
                     </div>
 
-                    {/* TEMPLATE */}
+
+                    {/* ======================================================
+                        EMAIL TEMPLATE
+                    ====================================================== */}
 
                     <div className="email-card">
 
-                        <h3>Email Template</h3>
+                        <h3>
+
+                            Email Template
+
+                        </h3>
+
 
                         <select
                             value={selectedTemplate}
+
                             onChange={(e) =>
-                                setSelectedTemplate(e.target.value)
+                                setSelectedTemplate(
+                                    e.target.value
+                                )
                             }
                         >
 
@@ -474,6 +654,7 @@ async function loadUsers() {
                                 Select Template
 
                             </option>
+
 
                             {templates.map((template) => (
 
@@ -490,38 +671,89 @@ async function loadUsers() {
 
                         </select>
 
+
+                        {templates.length === 0 && (
+
+                            <p>
+
+                                No active email templates available.
+
+                            </p>
+
+                        )}
+
+
+                        {/* ==================================================
+                            RECIPIENT
+                        ================================================== */}
+
                         {selectedUser && (
+
                             <div className="recipient-box">
 
-                                <h4>Recipient</h4>
+                                <h4>
+
+                                    Recipient
+
+                                </h4>
+
 
                                 <p>
 
                                     <strong>
-                                        {selectedUser.firstName}{" "}
-                                        {selectedUser.lastName}
+
+                                        {selectedUser.firstName || ""}{" "}
+
+                                        {selectedUser.lastName || ""}
+
                                     </strong>
 
                                 </p>
 
-                                <p>{selectedUser.email}</p>
+
+                                <p>
+
+                                    {selectedUser.email}
+
+                                </p>
+
+
+                                <p>
+
+                                    Status:{" "}
+
+                                    <strong>
+
+                                        {selectedUser.status}
+
+                                    </strong>
+
+                                </p>
 
                             </div>
+
                         )}
+
+
+                        {/* ==================================================
+                            SEND BUTTON
+                        ================================================== */}
 
                         <button
                             className="send-email-btn"
+
                             disabled={
                                 sending ||
                                 !selectedUser ||
                                 !selectedTemplate
                             }
+
                             onClick={handleSendEmail}
                         >
 
                             {sending
                                 ? "Sending..."
-                                : "Send Follow-up Email"}
+                                : "Send Email"}
 
                         </button>
 
@@ -531,14 +763,25 @@ async function loadUsers() {
 
             </div>
 
+
+            {/* ==========================================================
+                VERIFICATION MODAL
+            ========================================================== */}
+
             {selectedVerification && (
 
                 <UserDetailsModal
-                    verificationId={selectedVerification}
+
+                    verificationId={
+                        selectedVerification
+                    }
+
                     onClose={() =>
                         setSelectedVerification(null)
                     }
+
                     refresh={loadUsers}
+
                 />
 
             )}
