@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import {
     getMyReferrals
-} from "../controllers/referral.controllers.js";
+} from "../controllers/referral.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 
