@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getMyReferrals } from "../../api/referral.api";
+import { getMyReferrals } from "../../../api/referral.api";
 import "./Referrals.css";
 
 export default function Referrals() {
