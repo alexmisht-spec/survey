@@ -7,7 +7,8 @@ import {
     FaSignOutAlt,
     FaChevronLeft,
     FaChevronRight,
-    FaGift
+    FaGift,
+    FaUserFriends
 } from "react-icons/fa";
 
 import { NavLink } from "react-router-dom";
@@ -36,6 +37,12 @@ export default function Sidebar({ collapsed, onToggle }) {
         },
 
         {
+            name: "Refer & Earn",
+            icon: <FaUserFriends />,
+            path: "/dashboard/referrals"
+        },
+
+        {
             name: "Wallet",
             icon: <FaWallet />,
             path: "/dashboard/wallet"
@@ -57,7 +64,9 @@ export default function Sidebar({ collapsed, onToggle }) {
 
     return (
 
-        <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+        <aside
+            className={`sidebar ${collapsed ? "collapsed" : ""}`}
+        >
 
             <div className="sidebar-header">
 
@@ -72,13 +81,21 @@ export default function Sidebar({ collapsed, onToggle }) {
                 <button
                     className="collapse-btn"
                     onClick={onToggle}
-                    aria-label={collapsed ? "Expand" : "Collapse"}
+                    aria-label={
+                        collapsed
+                            ? "Expand"
+                            : "Collapse"
+                    }
                     type="button"
                 >
-                    {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
+                    {collapsed
+                        ? <FaChevronRight />
+                        : <FaChevronLeft />
+                    }
                 </button>
 
             </div>
+
 
             <nav>
 
@@ -87,7 +104,9 @@ export default function Sidebar({ collapsed, onToggle }) {
                     <NavLink
                         key={item.name}
                         to={item.path}
-                        end={item.path === "/dashboard"}
+                        end={
+                            item.path === "/dashboard"
+                        }
                         className={({ isActive }) =>
                             isActive
                                 ? "sidebar-link active"
@@ -97,7 +116,9 @@ export default function Sidebar({ collapsed, onToggle }) {
 
                         {item.icon}
 
-                        <span>{item.name}</span>
+                        <span>
+                            {item.name}
+                        </span>
 
                     </NavLink>
 
@@ -105,11 +126,17 @@ export default function Sidebar({ collapsed, onToggle }) {
 
             </nav>
 
-            <button className="logout-btn" type="button">
+
+            <button
+                className="logout-btn"
+                type="button"
+            >
 
                 <FaSignOutAlt />
 
-                <span>Logout</span>
+                <span>
+                    Logout
+                </span>
 
             </button>
 

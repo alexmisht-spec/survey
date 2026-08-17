@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import {
+    useNavigate,
+    Link,
+    useSearchParams
+} from "react-router-dom";
+
 import useAuth from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 import "./Register.css";
 
 export default function Register() {
@@ -11,86 +17,178 @@ export default function Register() {
 
     const { register } = useAuth();
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    // ==========================================================
+    // GET REFERRAL CODE FROM URL
+    // Example:
+    // /register?ref=SP-R5VUPE
+    // ==========================================================
+
+    const [searchParams] = useSearchParams();
+
+    const referralCode =
+        searchParams.get("ref")?.trim().toUpperCase() || "";
+
+
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const [showConfirmPassword, setShowConfirmPassword] =
+        useState(false);
+
 
     const [form, setForm] = useState({
+
         firstName: "",
         lastName: "",
         email: "",
         phone: "",
         password: "",
         confirmPassword: "",
+
     });
 
-    const [loading, setLoading] = useState(false);
+
+    const [loading, setLoading] =
+        useState(false);
+
+
+    // ==========================================================
+    // HANDLE INPUT CHANGES
+    // ==========================================================
 
     const handleChange = (e) => {
 
         setForm({
+
             ...form,
-            [e.target.name]: e.target.value,
+
+            [e.target.name]:
+                e.target.value,
+
         });
 
     };
 
-  const handleSubmit = async (e) => {
 
-    e.preventDefault();
+    // ==========================================================
+    // SUBMIT REGISTRATION
+    // ==========================================================
 
-    if (form.password !== form.confirmPassword) {
+    const handleSubmit = async (e) => {
 
-        return toast.error("Passwords do not match.");
+        e.preventDefault();
 
-    }
 
-    try {
+        // Password confirmation
 
-        setLoading(true);
+        if (
+            form.password !==
+            form.confirmPassword
+        ) {
 
-        const data = await register({
-
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
-            phone: form.phone,
-            password: form.password,
-
-        });
-
-        toast.success("Account created successfully!");
-
-        if (data.user.role === "ADMIN") {
-
-            navigate("/admin/dashboard");
-
-        } else if (data.user.verificationStatus === "NOT_SUBMITTED") {
-
-            navigate("/complete-profile");
-
-        } else {
-
-            navigate("/dashboard");
+            return toast.error(
+                "Passwords do not match."
+            );
 
         }
 
-    } catch (error) {
 
-        toast.error(
+        try {
 
-            error.response?.data?.message ||
+            setLoading(true);
 
-            "Registration failed."
 
-        );
+            // ==================================================
+            // SEND REFERRAL CODE TO BACKEND
+            // ==================================================
 
-    } finally {
+            const data = await register({
 
-        setLoading(false);
+                firstName:
+                    form.firstName,
 
-    }
+                lastName:
+                    form.lastName,
 
-};
+                email:
+                    form.email,
+
+                phone:
+                    form.phone,
+
+                password:
+                    form.password,
+
+                referralCode:
+                    referralCode || undefined,
+
+            });
+
+
+            toast.success(
+                "Account created successfully!"
+            );
+
+
+            // ==================================================
+            // NAVIGATION
+            // ==================================================
+
+            if (
+                data.user.role ===
+                "ADMIN"
+            ) {
+
+                navigate(
+                    "/admin/dashboard"
+                );
+
+            }
+
+            else if (
+                data.user.verificationStatus ===
+                "NOT_SUBMITTED"
+            ) {
+
+                navigate(
+                    "/complete-profile"
+                );
+
+            }
+
+            else {
+
+                navigate(
+                    "/dashboard"
+                );
+
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "REGISTRATION ERROR:",
+                error
+            );
+
+
+            toast.error(
+
+                error.response?.data?.message ||
+
+                "Registration failed."
+
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
 
     return (
 
@@ -98,48 +196,111 @@ export default function Register() {
 
             <div className="register-card">
 
+
+                {/* ==================================================
+                    HEADER
+                ================================================== */}
+
                 <div className="register-header">
 
-                    <h2>Create Account</h2>
+                    <h2>
+                        Create Account
+                    </h2>
 
                     <p>
-                        Join SurveyPool and start earning from surveys.
+                        Join SurveyPool and start
+                        earning from surveys.
                     </p>
 
                 </div>
+
+
+                {/* ==================================================
+                    REFERRAL NOTICE
+                ================================================== */}
+
+                {referralCode && (
+
+                    <div
+                        style={{
+                            background: "#f0fdf4",
+                            border: "1px solid #bbf7d0",
+                            color: "#166534",
+                            padding: "10px 14px",
+                            borderRadius: "8px",
+                            marginBottom: "16px",
+                            fontSize: "14px"
+                        }}
+                    >
+
+                        You were referred to
+                        SurveyPool.
+
+                        <strong
+                            style={{
+                                marginLeft: "5px"
+                            }}
+                        >
+                            {referralCode}
+                        </strong>
+
+                    </div>
+
+                )}
+
+
+                {/* ==================================================
+                    FORM
+                ================================================== */}
 
                 <form
                     onSubmit={handleSubmit}
                     className="register-form"
                 >
 
+
+                    {/* FIRST + LAST NAME */}
+
                     <div className="form-grid">
 
                         <div className="form-group">
 
-                            <label>First Name</label>
+                            <label>
+                                First Name
+                            </label>
 
                             <input
                                 type="text"
                                 name="firstName"
                                 placeholder="John"
-                                value={form.firstName}
-                                onChange={handleChange}
+                                value={
+                                    form.firstName
+                                }
+                                onChange={
+                                    handleChange
+                                }
                                 required
                             />
 
                         </div>
 
+
                         <div className="form-group">
 
-                            <label>Last Name</label>
+                            <label>
+                                Last Name
+                            </label>
 
                             <input
                                 type="text"
                                 name="lastName"
                                 placeholder="Doe"
-                                value={form.lastName}
-                                onChange={handleChange}
+                                value={
+                                    form.lastName
+                                }
+                                onChange={
+                                    handleChange
+                                }
                                 required
                             />
 
@@ -147,48 +308,79 @@ export default function Register() {
 
                     </div>
 
+
+                    {/* EMAIL */}
+
                     <div className="form-group">
 
-                        <label>Email Address</label>
+                        <label>
+                            Email Address
+                        </label>
 
                         <input
                             type="email"
                             name="email"
                             placeholder="john@example.com"
-                            value={form.email}
-                            onChange={handleChange}
+                            value={
+                                form.email
+                            }
+                            onChange={
+                                handleChange
+                            }
                             required
                         />
 
                     </div>
 
+
+                    {/* PHONE */}
+
                     <div className="form-group">
 
-                        <label>Phone Number</label>
+                        <label>
+                            Phone Number
+                        </label>
 
                         <input
                             type="tel"
                             name="phone"
                             placeholder="07XXXXXXXX"
-                            value={form.phone}
-                            onChange={handleChange}
+                            value={
+                                form.phone
+                            }
+                            onChange={
+                                handleChange
+                            }
                             required
                         />
 
                     </div>
 
+
+                    {/* PASSWORD */}
+
                     <div className="form-group">
 
-                        <label>Password</label>
+                        <label>
+                            Password
+                        </label>
 
                         <div className="password-field">
 
                             <input
-                                type={showPassword ? "text" : "password"}
+                                type={
+                                    showPassword
+                                        ? "text"
+                                        : "password"
+                                }
                                 name="password"
                                 placeholder="Enter password"
-                                value={form.password}
-                                onChange={handleChange}
+                                value={
+                                    form.password
+                                }
+                                onChange={
+                                    handleChange
+                                }
                                 required
                             />
 
@@ -196,11 +388,17 @@ export default function Register() {
                                 type="button"
                                 className="password-toggle"
                                 onClick={() =>
-                                    setShowPassword(!showPassword)
+                                    setShowPassword(
+                                        !showPassword
+                                    )
                                 }
                             >
 
-                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                {
+                                    showPassword
+                                        ? <FaEyeSlash />
+                                        : <FaEye />
+                                }
 
                             </button>
 
@@ -208,18 +406,31 @@ export default function Register() {
 
                     </div>
 
+
+                    {/* CONFIRM PASSWORD */}
+
                     <div className="form-group">
 
-                        <label>Confirm Password</label>
+                        <label>
+                            Confirm Password
+                        </label>
 
                         <div className="password-field">
 
                             <input
-                                type={showConfirmPassword ? "text" : "password"}
+                                type={
+                                    showConfirmPassword
+                                        ? "text"
+                                        : "password"
+                                }
                                 name="confirmPassword"
                                 placeholder="Confirm password"
-                                value={form.confirmPassword}
-                                onChange={handleChange}
+                                value={
+                                    form.confirmPassword
+                                }
+                                onChange={
+                                    handleChange
+                                }
                                 required
                             />
 
@@ -227,17 +438,26 @@ export default function Register() {
                                 type="button"
                                 className="password-toggle"
                                 onClick={() =>
-                                    setShowConfirmPassword(!showConfirmPassword)
+                                    setShowConfirmPassword(
+                                        !showConfirmPassword
+                                    )
                                 }
                             >
 
-                                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                {
+                                    showConfirmPassword
+                                        ? <FaEyeSlash />
+                                        : <FaEye />
+                                }
 
                             </button>
 
                         </div>
 
                     </div>
+
+
+                    {/* TERMS */}
 
                     <label className="terms-check">
 
@@ -249,13 +469,23 @@ export default function Register() {
                         <span>
 
                             I agree to the{" "}
-                            <strong>Terms & Conditions</strong>
+
+                            <strong>
+                                Terms & Conditions
+                            </strong>
+
                             {" "}and{" "}
-                            <strong>Privacy Policy</strong>.
+
+                            <strong>
+                                Privacy Policy
+                            </strong>.
 
                         </span>
 
                     </label>
+
+
+                    {/* SUBMIT */}
 
                     <button
                         type="submit"
@@ -271,7 +501,11 @@ export default function Register() {
 
                     </button>
 
+
                 </form>
+
+
+                {/* FOOTER */}
 
                 <div className="register-footer">
 
@@ -284,6 +518,7 @@ export default function Register() {
                     </Link>
 
                 </div>
+
 
             </div>
 
