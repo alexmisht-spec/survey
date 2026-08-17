@@ -3,8 +3,8 @@ import {
     FaClipboardList,
     FaWallet,
     FaMoneyCheckAlt,
-    FaCog,
     FaGift,
+    FaUsers,
 } from "react-icons/fa";
 
 import { NavLink } from "react-router-dom";
@@ -34,6 +34,12 @@ export default function MobileBottomNav() {
         },
 
         {
+            name: "Referrals",
+            icon: <FaUsers />,
+            path: "/dashboard/referrals",
+        },
+
+        {
             name: "Wallet",
             icon: <FaWallet />,
             path: "/dashboard/wallet",
@@ -43,12 +49,6 @@ export default function MobileBottomNav() {
             name: "Withdraw",
             icon: <FaMoneyCheckAlt />,
             path: "/dashboard/withdraw",
-        },
-
-        {
-            name: "Settings",
-            icon: <FaCog />,
-            path: "/dashboard/settings",
         },
 
     ];
@@ -69,8 +69,11 @@ export default function MobileBottomNav() {
                             : "mobile-link"
                     }
                 >
+
                     {item.icon}
+
                     <span>{item.name}</span>
+
                 </NavLink>
 
             ))}

@@ -59,6 +59,7 @@ enum PaymentMethod {
 
 enum TransactionType {
   SURVEY_REWARD
+  REFERRAL_REWARD
   WITHDRAWAL
   WITHDRAWAL_REFUND
   BONUS
@@ -89,6 +90,13 @@ enum NotificationType {
   SUCCESS
   WARNING
   ERROR
+}
+
+enum ReferralStatus {
+  PENDING
+  QUALIFIED
+  REWARDED
+  CANCELLED
 }
 
 /**
@@ -122,16 +130,41 @@ model User {
 
   wallet Wallet?
 
-  surveyResponses   SurveyResponse[]
-  passwordOtp       String?
+  surveyResponses SurveyResponse[]
+
+  passwordOtp String?
+
   passwordOtpExpiry DateTime?
 
-  withdrawals      Withdrawal[]
-  assignments      SurveyAssignment[]
-  notifications    Notification[]
-  passwordOtps     PasswordResetOTP[]
+  withdrawals Withdrawal[]
+
+  assignments SurveyAssignment[]
+
+  notifications Notification[]
+
+  passwordOtps PasswordResetOTP[]
+
   rewardCredential RewardCredential?
-  emailLogs        EmailLog[]
+
+  emailLogs EmailLog[]
+
+  /**
+   * |--------------------------------------------------------------------------
+   * | REFERRALS
+   * |--------------------------------------------------------------------------
+   */
+
+  referralCode String? @unique
+
+  referredById String?
+
+  referredBy User? @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+
+  referrals User[] @relation("UserReferrals")
+
+  referralsSent Referral[] @relation("ReferralReferrer")
+
+  referralReceived Referral? @relation("ReferralReferred")
 }
 
 /**
@@ -519,4 +552,36 @@ model EmailLog {
   @@index([templateId])
   @@index([status])
   @@index([sentAt])
+}
+
+/**
+ * |--------------------------------------------------------------------------
+ * | REFERRALS
+ * |--------------------------------------------------------------------------
+ */
+
+model Referral {
+  id String @id @default(cuid())
+
+  referrerId String
+
+  referredId String @unique
+
+  reward Decimal @db.Decimal(18, 2)
+
+  status ReferralStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  qualifiedAt DateTime?
+
+  rewardedAt DateTime?
+
+  referrer User @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  referred User @relation("ReferralReferred", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId])
+  @@index([status])
+  @@index([createdAt])
 }

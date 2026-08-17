@@ -28,6 +28,7 @@ import withdrawalRoutes from "./routes/withdrawal.routes.js";
 import rewardAdminRoutes from "./routes/rewardAdmin.routes.js";
 import rewardRoutes from "./routes/reward.route.js";
 import adminEmailRoutes from "./routes/adminEmail.routes.js";
+import referralRoutes from "./routes/referral.routes.js";
 
 const app = express();
 
@@ -123,6 +124,7 @@ app.use(
     "/api/admin/email",
     adminEmailRoutes
 );
+app.use("/api/referrals", referralRoutes);
 /*
 |--------------------------------------------------------------------------
 | Admin Routes

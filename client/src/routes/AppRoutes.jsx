@@ -38,6 +38,7 @@ import Bonus from "../pages/Dashboard/bonus/Bonus";
 import EveryLogin from "../pages/Dashboard/bonus/EveryLogin";
 import Redirecting from "../pages/Dashboard/Redirecting";
 import BonusStatus from "../pages/Dashboard/bonus/BonusStatus";
+import Referrals from "../pages/Dashboard/components/Referrals";
 
 export default function AppRoutes() {
 
@@ -130,6 +131,10 @@ export default function AppRoutes() {
             path="bonus"
             element={<Bonus />}
         />
+        <Route
+        path="referrals"
+        element={<Referrals />}
+    />
 
         <Route
             path="settings"

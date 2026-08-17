@@ -4,6 +4,67 @@ import generateAccessToken from "../utilis/auth/generateAccessToken.js";
 import generateRefreshToken from "../utilis/auth/generateRefreshToken.js";
 import verifyRefreshToken from "../utilis/auth/verifyRefreshToken.js";
 
+
+/*
+|--------------------------------------------------------------------------
+| GENERATE UNIQUE REFERRAL CODE
+|--------------------------------------------------------------------------
+*/
+
+async function generateReferralCode() {
+
+    const characters =
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let code;
+
+    let exists = true;
+
+    while (exists) {
+
+        let randomPart = "";
+
+        for (let i = 0; i < 6; i++) {
+
+            randomPart +=
+                characters[
+                    Math.floor(
+                        Math.random() * characters.length
+                    )
+                ];
+
+        }
+
+        code = `SP-${randomPart}`;
+
+        const existing =
+            await prisma.user.findUnique({
+
+                where: {
+                    referralCode: code
+                },
+
+                select: {
+                    id: true
+                }
+
+            });
+
+        exists = !!existing;
+
+    }
+
+    return code;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| REGISTER
+|--------------------------------------------------------------------------
+*/
+
 export const register = async (req, res) => {
 
     console.log("===== REGISTER REQUEST =====");
@@ -17,8 +78,16 @@ export const register = async (req, res) => {
             lastName,
             email,
             phone,
-            password
+            password,
+            referralCode
         } = req.body;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATION
+        |--------------------------------------------------------------------------
+        */
 
         if (
             !firstName ||
@@ -31,119 +100,339 @@ export const register = async (req, res) => {
             return res.status(400).json({
 
                 success: false,
+
                 message: "All fields are required."
 
             });
 
         }
 
-        const existingEmail = await prisma.user.findUnique({
 
-            where: {
-                email
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK EMAIL
+        |--------------------------------------------------------------------------
+        */
 
-        });
+        const existingEmail =
+            await prisma.user.findUnique({
+
+                where: {
+                    email
+                }
+
+            });
+
 
         if (existingEmail) {
 
             return res.status(409).json({
 
                 success: false,
+
                 message: "Email already exists."
 
             });
 
         }
 
-        const existingPhone = await prisma.user.findUnique({
 
-            where: {
-                phone
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK PHONE
+        |--------------------------------------------------------------------------
+        */
 
-        });
+        const existingPhone =
+            await prisma.user.findUnique({
+
+                where: {
+                    phone
+                }
+
+            });
+
 
         if (existingPhone) {
 
             return res.status(409).json({
 
                 success: false,
+
                 message: "Phone number already exists."
 
             });
 
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await prisma.user.create({
+        /*
+        |--------------------------------------------------------------------------
+        | GENERATE USER REFERRAL CODE
+        |--------------------------------------------------------------------------
+        */
 
-            data: {
+        const newReferralCode =
+            await generateReferralCode();
 
-                firstName,
-                lastName,
-                email,
-                phone,
-                password: hashedPassword,
 
-                wallet: {
+        /*
+        |--------------------------------------------------------------------------
+        | FIND REFERRER
+        |--------------------------------------------------------------------------
+        */
 
-                    create: {
+        let referrer = null;
 
-                        availableBalance: 0,
-                        pendingBalance: 0,
-                        totalEarned: 0
+
+        if (
+            referralCode &&
+            typeof referralCode === "string"
+        ) {
+
+            const cleanReferralCode =
+                referralCode.trim().toUpperCase();
+
+
+            referrer =
+                await prisma.user.findUnique({
+
+                    where: {
+
+                        referralCode:
+                            cleanReferralCode
+
+                    },
+
+                    select: {
+
+                        id: true,
+
+                        referralCode: true
 
                     }
 
-                }
+                });
 
-            },
 
-            include: {
+            /*
+            |--------------------------------------------------------------------------
+            | INVALID REFERRAL CODE
+            |--------------------------------------------------------------------------
+            |
+            | We don't reject registration if somebody enters
+            | an invalid referral code.
+            |
+            */
 
-                wallet: true
+            if (!referrer) {
+
+                console.log(
+                    "Invalid referral code:",
+                    cleanReferralCode
+                );
 
             }
 
-        });
+        }
 
-        // Generate tokens
-        const accessToken = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
 
-        // Store refresh token securely
-        res.cookie("refreshToken", refreshToken, {
+        /*
+        |--------------------------------------------------------------------------
+        | HASH PASSWORD
+        |--------------------------------------------------------------------------
+        */
 
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000
+        const hashedPassword =
+            await bcrypt.hash(password, 10);
 
-        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE USER
+        |--------------------------------------------------------------------------
+        */
+
+        const user =
+            await prisma.user.create({
+
+                data: {
+
+                    firstName,
+
+                    lastName,
+
+                    email,
+
+                    phone,
+
+                    password: hashedPassword,
+
+                    referralCode: newReferralCode,
+
+                    referredById:
+                        referrer?.id || null,
+
+                    wallet: {
+
+                        create: {
+
+                            availableBalance: 0,
+
+                            pendingBalance: 0,
+
+                            totalEarned: 0
+
+                        }
+
+                    }
+
+                },
+
+                include: {
+
+                    wallet: true
+
+                }
+
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE REFERRAL RECORD
+        |--------------------------------------------------------------------------
+        */
+
+        if (referrer) {
+
+            try {
+
+                await prisma.referral.create({
+
+                    data: {
+
+                        referrerId:
+                            referrer.id,
+
+                        referredId:
+                            user.id,
+
+                        reward: 50,
+
+                        status: "PENDING"
+
+                    }
+
+                });
+
+
+                console.log(
+                    `Referral created: ${referrer.id} -> ${user.id}`
+                );
+
+            } catch (referralError) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | REFERRAL FAILURE SHOULD NOT BREAK REGISTRATION
+                |--------------------------------------------------------------------------
+                */
+
+                console.error(
+                    "REFERRAL CREATION ERROR:",
+                    referralError
+                );
+
+            }
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GENERATE TOKENS
+        |--------------------------------------------------------------------------
+        */
+
+        const accessToken =
+            generateAccessToken(user);
+
+        const refreshToken =
+            generateRefreshToken(user);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STORE REFRESH TOKEN
+        |--------------------------------------------------------------------------
+        */
+
+        res.cookie(
+            "refreshToken",
+            refreshToken,
+            {
+
+                httpOnly: true,
+
+                secure:
+                    process.env.NODE_ENV === "production",
+
+                sameSite: "lax",
+
+                maxAge:
+                    7 * 24 * 60 * 60 * 1000
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
 
         return res.status(201).json({
 
             success: true,
 
-            message: "Account created successfully.",
+            message:
+                "Account created successfully.",
 
             accessToken,
 
             user: {
 
                 id: user.id,
+
                 firstName: user.firstName,
+
                 lastName: user.lastName,
+
                 email: user.email,
+
                 phone: user.phone,
+
                 role: user.role,
+
                 status: user.status,
 
+                referralCode:
+                    user.referralCode,
+
+                referredBy:
+                    referrer
+                        ? true
+                        : false,
+
                 profileCompleted: false,
-                verificationStatus: "NOT_SUBMITTED",
+
+                verificationStatus:
+                    "NOT_SUBMITTED",
+
                 paymentMethod: null,
+
                 mpesaNumber: null
 
             }
@@ -152,12 +441,17 @@ export const register = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "REGISTER ERROR:",
+            error
+        );
 
         return res.status(500).json({
 
             success: false,
-            message: "Internal Server Error"
+
+            message:
+                "Internal Server Error"
 
         });
 
@@ -165,91 +459,140 @@ export const register = async (req, res) => {
 
 };
 
+
+/*
+|--------------------------------------------------------------------------
+| LOGIN
+|--------------------------------------------------------------------------
+*/
+
 export const login = async (req, res) => {
 
     try {
 
-        const { email, password } = req.body;
+        const {
+            email,
+            password
+        } = req.body;
 
-        if (!email || !password) {
+
+        if (
+            !email ||
+            !password
+        ) {
 
             return res.status(400).json({
 
                 success: false,
-                message: "Email and password are required."
+
+                message:
+                    "Email and password are required."
 
             });
 
         }
 
-        const user = await prisma.user.findUnique({
 
-            where: {
-                email
-            },
+        const user =
+            await prisma.user.findUnique({
 
-            include: {
+                where: {
+                    email
+                },
 
-                verification: true,
-                wallet: true,
+                include: {
 
-            },
+                    verification: true,
 
-        });
+                    wallet: true
+
+                }
+
+            });
+
 
         if (!user) {
 
             return res.status(401).json({
 
                 success: false,
-                message: "Invalid email or password."
+
+                message:
+                    "Invalid email or password."
 
             });
 
         }
 
-        const passwordMatch = await bcrypt.compare(
 
-            password,
+        const passwordMatch =
+            await bcrypt.compare(
 
-            user.password
+                password,
 
-        );
+                user.password
+
+            );
+
 
         if (!passwordMatch) {
 
             return res.status(401).json({
 
                 success: false,
-                message: "Invalid email or password."
+
+                message:
+                    "Invalid email or password."
 
             });
 
         }
 
-        // Generate tokens
-        const accessToken = generateAccessToken(user);
 
-        const refreshToken = generateRefreshToken(user);
+        /*
+        |--------------------------------------------------------------------------
+        | GENERATE TOKENS
+        |--------------------------------------------------------------------------
+        */
 
-        // Store refresh token in HttpOnly cookie
-        res.cookie("refreshToken", refreshToken, {
+        const accessToken =
+            generateAccessToken(user);
 
-            httpOnly: true,
+        const refreshToken =
+            generateRefreshToken(user);
 
-            secure: process.env.NODE_ENV === "production",
 
-            sameSite: "lax",
+        /*
+        |--------------------------------------------------------------------------
+        | REFRESH TOKEN COOKIE
+        |--------------------------------------------------------------------------
+        */
 
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+        res.cookie(
+            "refreshToken",
+            refreshToken,
+            {
 
-        });
+                httpOnly: true,
+
+                secure:
+                    process.env.NODE_ENV === "production",
+
+                sameSite: "lax",
+
+                maxAge:
+                    7 * 24 * 60 * 60 * 1000
+
+            }
+        );
+
 
         return res.status(200).json({
 
             success: true,
 
-            message: "Login successful.",
+            message:
+                "Login successful.",
 
             accessToken,
 
@@ -269,11 +612,16 @@ export const login = async (req, res) => {
 
                 status: user.status,
 
-                profileCompleted: !!user.verification,
+                referralCode:
+                    user.referralCode,
 
-                verificationStatus: user.verification
-                    ? user.verification.status
-                    : "NOT_SUBMITTED",
+                profileCompleted:
+                    !!user.verification,
+
+                verificationStatus:
+                    user.verification
+                        ? user.verification.status
+                        : "NOT_SUBMITTED"
 
             }
 
@@ -288,7 +636,9 @@ export const login = async (req, res) => {
         return res.status(500).json({
 
             success: false,
-            message: "Internal Server Error"
+
+            message:
+                "Internal Server Error"
 
         });
 
@@ -296,54 +646,83 @@ export const login = async (req, res) => {
 
 };
 
+
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
+
 export const logout = async (req, res) => {
 
-    res.clearCookie("refreshToken", {
+    res.clearCookie(
+        "refreshToken",
+        {
 
-        httpOnly: true,
+            httpOnly: true,
 
-        secure: process.env.NODE_ENV === "production",
+            secure:
+                process.env.NODE_ENV === "production",
 
-        sameSite: "lax",
+            sameSite: "lax"
 
-    });
+        }
+    );
+
 
     return res.json({
 
         success: true,
 
-        message: "Logged out successfully."
+        message:
+            "Logged out successfully."
 
     });
 
 };
 
+
+/*
+|--------------------------------------------------------------------------
+| CURRENT USER
+|--------------------------------------------------------------------------
+*/
+
 export const me = async (req, res) => {
 
     try {
 
-        const user = await prisma.user.findUnique({
+        const user =
+            await prisma.user.findUnique({
 
-            where: {
-                id: req.user.id
-            },
+                where: {
 
-            include: {
-                verification: true
-            }
+                    id: req.user.id
 
-        });
+                },
+
+                include: {
+
+                    verification: true
+
+                }
+
+            });
+
 
         if (!user) {
 
             return res.status(404).json({
 
                 success: false,
-                message: "User not found"
+
+                message:
+                    "User not found"
 
             });
 
         }
+
 
         return res.status(200).json({
 
@@ -352,22 +731,37 @@ export const me = async (req, res) => {
             user: {
 
                 id: user.id,
+
                 firstName: user.firstName,
+
                 lastName: user.lastName,
+
                 email: user.email,
+
                 phone: user.phone,
+
                 role: user.role,
+
                 status: user.status,
 
-                profileCompleted: !!user.verification,
+                referralCode:
+                    user.referralCode,
 
-                verificationStatus: user.verification
-                    ? user.verification.status
-                    : "NOT_SUBMITTED",
+                profileCompleted:
+                    !!user.verification,
 
-                mpesaNumber: user.verification?.mpesaNumber || null,
+                verificationStatus:
+                    user.verification
+                        ? user.verification.status
+                        : "NOT_SUBMITTED",
 
-                paymentMethod: user.verification?.paymentMethod || null
+                mpesaNumber:
+                    user.verification?.mpesaNumber ||
+                    null,
+
+                paymentMethod:
+                    user.verification?.paymentMethod ||
+                    null
 
             }
 
@@ -380,54 +774,80 @@ export const me = async (req, res) => {
         return res.status(500).json({
 
             success: false,
-            message: "Server Error"
+
+            message:
+                "Server Error"
 
         });
 
     }
 
 };
+
+
+/*
+|--------------------------------------------------------------------------
+| REFRESH TOKEN
+|--------------------------------------------------------------------------
+*/
+
 export const refresh = async (req, res) => {
 
     try {
 
-        const refreshToken = req.cookies.refreshToken;
+        const refreshToken =
+            req.cookies.refreshToken;
+
 
         if (!refreshToken) {
 
             return res.status(401).json({
 
                 success: false,
-                message: "No refresh token."
+
+                message:
+                    "No refresh token."
 
             });
 
         }
 
-        const decoded = verifyRefreshToken(refreshToken);
 
-        const user = await prisma.user.findUnique({
+        const decoded =
+            verifyRefreshToken(
+                refreshToken
+            );
 
-            where: {
 
-                id: decoded.id
+        const user =
+            await prisma.user.findUnique({
 
-            }
+                where: {
 
-        });
+                    id: decoded.id
+
+                }
+
+            });
+
 
         if (!user) {
 
             return res.status(401).json({
 
                 success: false,
-                message: "User not found."
+
+                message:
+                    "User not found."
 
             });
 
         }
 
-        const accessToken = generateAccessToken(user);
+
+        const accessToken =
+            generateAccessToken(user);
+
 
         return res.json({
 
@@ -445,7 +865,8 @@ export const refresh = async (req, res) => {
 
             success: false,
 
-            message: "Refresh token expired."
+            message:
+                "Refresh token expired."
 
         });
 

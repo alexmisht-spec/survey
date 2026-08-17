@@ -1,0 +1,361 @@
+/* =========================================================
+   REFERRALS PAGE
+========================================================= */
+
+.referrals-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 30px;
+    box-sizing: border-box;
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.referrals-header {
+    margin-bottom: 28px;
+}
+
+.referrals-header h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.referrals-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   MAIN REFERRAL CARD
+========================================================= */
+
+.referral-main-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+.referral-main-content {
+    margin-bottom: 26px;
+}
+
+.referral-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.referral-code {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #111827;
+    margin-bottom: 10px;
+}
+
+.referral-main-content p {
+    margin: 0;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   REFERRAL LINK
+========================================================= */
+
+.referral-link-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.referral-link-box {
+    display: flex;
+    width: 100%;
+}
+
+.referral-link-box input {
+    flex: 1;
+    min-width: 0;
+    height: 48px;
+    padding: 0 15px;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    background: #f9fafb;
+    color: #475569;
+    font-size: 14px;
+    outline: none;
+}
+
+.referral-link-box button {
+    border: none;
+    padding: 0 22px;
+    border-radius: 0 10px 10px 0;
+    background: #111827;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.referral-link-box button:hover {
+    opacity: 0.9;
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.referral-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.referral-stat-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px;
+    box-sizing: border-box;
+}
+
+.referral-stat-card span {
+    display: block;
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.referral-stat-card strong {
+    display: block;
+    font-size: 27px;
+    color: #111827;
+}
+
+.referral-stat-card.earnings strong {
+    color: #15803d;
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+.referral-history-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.history-header {
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.history-header h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    color: #111827;
+}
+
+.history-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.referral-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.referral-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.referral-table th,
+.referral-table td {
+    padding: 17px 24px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.referral-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.referral-table td {
+    color: #475569;
+    font-size: 14px;
+}
+
+.referral-table td strong {
+    color: #111827;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.referral-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.referral-status.pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.referral-status.approved {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.referral-status.rejected {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-referrals {
+    padding: 60px 25px;
+    text-align: center;
+}
+
+.empty-referrals h3 {
+    margin: 0 0 8px;
+    color: #111827;
+}
+
+.empty-referrals p {
+    margin: 0;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   LOADING / ERROR
+========================================================= */
+
+.referrals-loading,
+.referrals-error {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 50px;
+    text-align: center;
+}
+
+.referrals-error h2 {
+    margin-top: 0;
+    color: #111827;
+}
+
+.referrals-error p {
+    color: #64748b;
+}
+
+.referrals-error button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #111827;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .referral-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .referrals-page {
+        padding: 18px;
+    }
+
+    .referrals-header h1 {
+        font-size: 25px;
+    }
+
+    .referral-main-card {
+        padding: 20px;
+    }
+
+    .referral-code {
+        font-size: 26px;
+    }
+
+    .referral-link-box {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .referral-link-box input {
+        border-right: 1px solid #d1d5db;
+        border-radius: 10px;
+    }
+
+    .referral-link-box button {
+        height: 45px;
+        border-radius: 10px;
+    }
+
+    .referral-stats {
+        grid-template-columns: 1fr;
+    }
+
+}
