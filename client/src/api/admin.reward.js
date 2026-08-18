@@ -15,6 +15,7 @@ export const approveReward = (assignmentId) =>
 export const rejectReward = (assignmentId) =>
     api.post(`/admin/rewards/${assignmentId}/reject`);
 
+
 /*
 |--------------------------------------------------------------------------
 | WITHDRAWALS
@@ -24,8 +25,20 @@ export const rejectReward = (assignmentId) =>
 export const getWithdrawals = () =>
     api.get("/admin/withdrawals");
 
-export const approveWithdrawal = (withdrawalId) =>
-    api.put(`/admin/withdrawals/${withdrawalId}/approve`);
+
+/*
+|--------------------------------------------------------------------------
+| MARK WITHDRAWAL AS PAID
+|--------------------------------------------------------------------------
+|
+| Admin manually sends the M-Pesa payment first,
+| then clicks "Mark as Paid".
+|--------------------------------------------------------------------------
+*/
+
+export const markWithdrawalPaid = (withdrawalId) =>
+    api.put(`/admin/withdrawals/${withdrawalId}/paid`);
+
 
 export const rejectWithdrawal = (withdrawalId) =>
     api.put(`/admin/withdrawals/${withdrawalId}/reject`);
