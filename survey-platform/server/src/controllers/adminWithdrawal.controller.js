@@ -7,6 +7,12 @@ import { Prisma } from "@prisma/client";
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| GET ALL WITHDRAWALS
+|--------------------------------------------------------------------------
+*/
+
 export const getWithdrawals = async (req, res) => {
     try {
 
@@ -17,8 +23,6 @@ export const getWithdrawals = async (req, res) => {
                 user: {
 
                     include: {
-
-                        profile: true,
 
                         wallet: true
 
@@ -47,55 +51,69 @@ export const getWithdrawals = async (req, res) => {
 
                 id: withdrawal.id,
 
-                amount: Number(withdrawal.amount),
+                amount: Number(
+                    withdrawal.amount
+                ),
 
-                phoneNumber: withdrawal.phoneNumber,
+                phoneNumber:
+                    withdrawal.phoneNumber,
 
-                status: withdrawal.status,
+                status:
+                    withdrawal.status,
 
-                createdAt: withdrawal.createdAt,
+                createdAt:
+                    withdrawal.createdAt,
 
-                approvedAt: withdrawal.approvedAt,
+                approvedAt:
+                    withdrawal.approvedAt,
 
-                processedAt: withdrawal.processedAt,
+                processedAt:
+                    withdrawal.processedAt,
 
-                failureReason: withdrawal.failureReason,
+                failureReason:
+                    withdrawal.failureReason,
 
                 user: {
 
-                    id: withdrawal.user.id,
+                    id:
+                        withdrawal.user.id,
 
-                    firstName: withdrawal.user.firstName,
+                    firstName:
+                        withdrawal.user.firstName,
 
-                    lastName: withdrawal.user.lastName,
+                    lastName:
+                        withdrawal.user.lastName,
 
-                    email: withdrawal.user.email,
+                    email:
+                        withdrawal.user.email,
 
-                    phone: withdrawal.user.phone,
+                    phone:
+                        withdrawal.user.phone,
 
-                    wallet: withdrawal.user.wallet
-                        ? {
+                    wallet:
+                        withdrawal.user.wallet
+                            ? {
 
-                            availableBalance:
-                                Number(
-                                    withdrawal.user.wallet.availableBalance
-                                ),
+                                availableBalance:
+                                    Number(
+                                        withdrawal.user.wallet
+                                            .availableBalance
+                                    ),
 
-                            pendingBalance:
-                                Number(
-                                    withdrawal.user.wallet.pendingBalance
-                                ),
+                                pendingBalance:
+                                    Number(
+                                        withdrawal.user.wallet
+                                            .pendingBalance
+                                    ),
 
-                            totalEarned:
-                                Number(
-                                    withdrawal.user.wallet.totalEarned
-                                )
+                                totalEarned:
+                                    Number(
+                                        withdrawal.user.wallet
+                                            .totalEarned
+                                    )
 
-                        }
-                        : null,
-
-                    profile:
-                        withdrawal.user.profile || null
+                            }
+                            : null
 
                 }
 
@@ -114,7 +132,9 @@ export const getWithdrawals = async (req, res) => {
 
             success: false,
 
-            message: "Server Error"
+            message:
+                error.message ||
+                "Server Error"
 
         });
 
