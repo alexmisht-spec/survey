@@ -4,18 +4,30 @@ import { Prisma } from "@prisma/client";
 async function settlePaidBalances() {
 
     console.log("======================================");
-    console.log("SETTLING PAID AVAILABLE BALANCES");
+    console.log("SETTLING PAID WALLET BALANCES");
     console.log("======================================");
 
     try {
 
         const wallets = await prisma.wallet.findMany({
+
             where: {
-                availableBalance: {
-                    gt: 0
-                }
+                OR: [
+                    {
+                        availableBalance: {
+                            gt: 0
+                        }
+                    },
+                    {
+                        pendingBalance: {
+                            gt: 0
+                        }
+                    }
+                ]
             },
+
             include: {
+
                 user: {
                     select: {
                         id: true,
@@ -24,43 +36,73 @@ async function settlePaidBalances() {
                         email: true
                     }
                 }
+
             },
+
             orderBy: {
-                availableBalance: "desc"
+                updatedAt: "desc"
             }
+
         });
 
 
         console.log(
-            `Users with available balances: ${wallets.length}`
+            `Users with balances to settle: ${wallets.length}`
         );
 
 
         if (wallets.length === 0) {
 
             console.log(
-                "No available balances need to be settled."
+                "No balances need to be settled."
             );
 
             return;
+
         }
 
 
-        let totalPaid = new Prisma.Decimal(0);
+        let totalAvailable = new Prisma.Decimal(0);
+        let totalPending = new Prisma.Decimal(0);
+        let totalSettled = new Prisma.Decimal(0);
 
 
         for (const wallet of wallets) {
 
-            const amount =
+            const available =
                 new Prisma.Decimal(
                     wallet.availableBalance
                 );
 
+            const pending =
+                new Prisma.Decimal(
+                    wallet.pendingBalance
+                );
+
+            const total =
+                available.add(pending);
+
+
+            console.log("--------------------------------------");
 
             console.log(
-                `${wallet.user.firstName} ${wallet.user.lastName} | ` +
-                `${wallet.user.email} | ` +
-                `KSh ${amount.toFixed(2)}`
+                `${wallet.user.firstName} ${wallet.user.lastName}`
+            );
+
+            console.log(
+                `Email: ${wallet.user.email}`
+            );
+
+            console.log(
+                `Available: KSh ${available.toFixed(2)}`
+            );
+
+            console.log(
+                `Pending: KSh ${pending.toFixed(2)}`
+            );
+
+            console.log(
+                `Total: KSh ${total.toFixed(2)}`
             );
 
 
@@ -68,46 +110,50 @@ async function settlePaidBalances() {
 
                 /*
                 |--------------------------------------------------------------------------
-                | RECORD MANUAL PAYMENT RECONCILIATION
+                | RECORD RECONCILIATION
                 |--------------------------------------------------------------------------
                 */
 
-                await tx.walletTransaction.create({
+                if (total.greaterThan(0)) {
 
-                    data: {
+                    await tx.walletTransaction.create({
 
-                        walletId:
-                            wallet.id,
+                        data: {
 
-                        amount:
-                            amount,
+                            walletId:
+                                wallet.id,
 
-                        balanceBefore:
-                            amount,
+                            amount:
+                                total,
 
-                        balanceAfter:
-                            new Prisma.Decimal(0),
+                            balanceBefore:
+                                available,
 
-                        type:
-                            "ADJUSTMENT",
+                            balanceAfter:
+                                new Prisma.Decimal(0),
 
-                        status:
-                            "SUCCESS",
+                            type:
+                                "ADJUSTMENT",
 
-                        reference:
-                            `MANUAL-PAYMENT-${Date.now()}-${wallet.id}`,
+                            status:
+                                "SUCCESS",
 
-                        description:
-                            "Available wallet balance settled after manual payment to user by administrator."
+                            reference:
+                                `MANUAL-SETTLEMENT-${wallet.id}-${Date.now()}`,
 
-                    }
+                            description:
+                                "Wallet balances reconciled after manual payment disbursement by administrator."
 
-                });
+                        }
+
+                    });
+
+                }
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | CLEAR AVAILABLE BALANCE
+                | CLEAR BOTH BALANCES
                 |--------------------------------------------------------------------------
                 */
 
@@ -120,6 +166,9 @@ async function settlePaidBalances() {
                     data: {
 
                         availableBalance:
+                            new Prisma.Decimal(0),
+
+                        pendingBalance:
                             new Prisma.Decimal(0)
 
                     }
@@ -129,8 +178,14 @@ async function settlePaidBalances() {
             });
 
 
-            totalPaid =
-                totalPaid.add(amount);
+            totalAvailable =
+                totalAvailable.add(available);
+
+            totalPending =
+                totalPending.add(pending);
+
+            totalSettled =
+                totalSettled.add(total);
 
         }
 
@@ -145,8 +200,19 @@ async function settlePaidBalances() {
         );
 
         console.log(
-            `Total settled: KSh ${totalPaid.toFixed(2)}`
+            `Available settled: KSh ${totalAvailable.toFixed(2)}`
         );
+
+        console.log(
+            `Pending settled: KSh ${totalPending.toFixed(2)}`
+        );
+
+        console.log(
+            `TOTAL SETTLED: KSh ${totalSettled.toFixed(2)}`
+        );
+
+        console.log("======================================");
+
 
     } catch (error) {
 
